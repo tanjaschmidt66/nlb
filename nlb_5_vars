@@ -1,0 +1,2700 @@
+***NLB
+*do /Users/greta/Desktop/Datentonne/Tanja_Schmidt/NLB/do/NLB_5_pass_variablen_290515.do
+*do J:\SicherungElitebook\okt2013\_arbeit\__projekte\HWR_NLB2\data\do\NLB_5_pass_variablen_290515.do
+*do J:\SicherungElitebook\okt2013\_arbeit\__projekte\HWR_NLB2\data\do\NLB_5_pass_variablen_290515.do
+*do G:/NLB/do/NLB_5_pass_variablen_290515.do
+* Konstruktion der NLB Variablen + erste Tabellen erstellen!
+*******************************************************************
+
+
+*version 11.0
+capture log close
+set more off
+*#delimit  
+
+clear
+set memory 1g
+* auskommentiert wegen gretas stata version
+*set maxvar 20000
+*set matsize 500
+
+
+/*
+local	dir_a="j:/SicherungElitebook/okt2013/_arbeit/__projekte/Daten/pass"
+local 	dir_b="j:/SicherungElitebook/okt2013/_arbeit/__projekte/HWR_NLB2/data/do"
+local 	dir_c="j:/SicherungElitebook/okt2013/_arbeit/__projekte/HWR_NLB2/data/log"
+local 	dir_d="j:/SicherungElitebook/okt2013/_arbeit/__projekte/HWR_NLB2/data/files"
+local 	dir_t="j:/SicherungElitebook/okt2013/_arbeit/__projekte/HWR_NLB2/data/tab"
+
+*/
+
+* Pfade Tanja Laptop 
+local	dir_a="/Volumes/extern/Daten/pass"
+local 	dir_b="G:/NLB/do"
+local 	dir_c="G:/NLB/log"
+local 	dir_d="G:/NLB/files"
+local 	dir_t="G:/NLB/tab"
+*/
+
+/* Hier Anpassung des Pfades zu den Datensaetzen von Greta (Mac book) auf USB-Stick! *
+local	dir_a="/Volumes/extern/Daten/pass"
+local 	dir_b="/Volumes/USBGreta/NLB/do"
+local 	dir_c="/Volumes/USBGreta/NLB/log"
+local 	dir_d="/Volumes/USBGreta/NLB/files"
+local 	dir_t="/Volumes/USBGreta/NLB/tab"
+
+/* Hier Anpassung des Pfades zu den Datensaetzen von Greta (Mac book) *
+local	dir_a="/Volumes/extern/Daten/pass"
+local 	dir_b="/Users/greta/Desktop/Datentonne/Tanja_Schmidt/NLB/do"
+local 	dir_c="/Users/greta/Desktop/Datentonne/Tanja_Schmidt/NLB/log"
+local 	dir_d="/Users/greta/Desktop/Datentonne/Tanja_Schmidt/NLB/files"
+local 	dir_t="/Users/greta/Desktop/Datentonne/Tanja_Schmidt/NLB/tab"
+
+*/
+
+* Hier Anpassung des Pfades zu den Datensaetzen von Greta (PC) *
+*local	dir_a="C:/Users/Tristan/Documents/Daten/pass_v9"
+*local 	dir_b="C:/Users/Tristan/Documents/NLB/do"
+*local 	dir_c="C:/Users/Tristan/Documents/NLB/log"
+*local 	dir_d="C:/Users/Tristan/Documents/NLB/files"
+*local 	dir_t="C:/Users/Tristan/Documents/NLB/tab"
+
+*/
+capture log using `dir_c'\NLB_5_pass_variablen_300615.log, replace
+
+di        "Job started at $S_TIME on $S_DATE"
+
+use `dir_d'/NLB_4_phspellvars.dta
+
+
+
+/* Generierung: Ausuebung eines Minijobs
+
+PET0500         byte   %42.0g      PET0500_lb
+                                              Erwerbstaetig: Mini-Job? (Erhebung in Welle 1 sowie Senioren
+                                                ab Welle 2)
+PET0510         byte   %42.0g      janein     Erwerbstaetig: Mini-Job? (Erhebung ab Welle 2, ohne Senioren)
+
+Filter ueberpruefen von Welle 1:
+a) PET0100!=1 (Bezahlt. Taetigkeit mind. 1 Std./Woche?)
+b) PET0300==1 (Erwerbs. = TEil der Ausbildung)
+c) PET0400==1 (Taetigkeit = öffentl. geför. Beschseftigung)
+
+W1: 
+9388 Faelle auf PET0500==-3
+4 Faelle auf PET0500==-2
+26 Faelle auf PET0500==-1
+1757 Faelle auf PET0500==1
+5950 Faelle auf PET0500==2
+
+9388 Faelle auf PET0500==-3
+a) davon PET0100==2 
+7988 Faelle mit PET0500==-3
+
+davon PET0100==-1
+4 Faelle mit PET0500==-3
+
+davon PET0100==-2
+18 Faelle mit PET0500==-3
+
+b)davon PET0300==1
+507 Faelle mit PET0500==-3
+
+c) davon PET0400==1
+871 Faelle mit PET0500==-3
+
+==9388 Faelle, ok!
+
+AB Welle 2 sind 2120 Faelle mit PET0510==-3
+667 Faelle mit PET0510==-10 (Senioren)
+von diesen 667 Senioren, haben 571 Faelle auf PET0500==-3
+
+Filter in Welle 2 und WElle3
+a) Alle außer Schueler und Auszubildene (PB0100==1 | 3)
+
+Schueler und Auszubildene von Welle 2 auf PET0510==-3
+tab PET0510 if welle==2 & (PB0100==1 | PB0100==3)
+N=1067
+
+ansonsten: in Welle 2
+105 Faelle mit PET0510==-10
+50 Faelle mit PET0510==-4
+9 Faelle mit PET0510==-2
+3 Faelle mit PET0510==-1
+1458 Faelle mit PET0510==1
+8465 Faelle mit PET0510==2
+
+Schueler und Auszubildene von Welle 3 auf PET0510==-3
+tab PET0510 if welle==3 & (PB0100==1 | PB0100==3)
+N=1053
+
+ansonsten in Welle 3
+153 Faelle mit PET0510==-4
+5 Faelle mit PET0510==-2
+0 Faelle mit PET0510==-1
+1501 Faelle mit PET0510==1
+9382 Faelle mit PET0510==2
+
+Filter in Welle 4-6
+kein Filter, bis auf Senioren!
+
+409 Faelle mit PET0510==-10
+16 Faelle mit PET0510==-2
+9 Faelle mit PET0510==-1
+5085 Faelle mit PET0510==1
+31468 Faelle mit PET0510==2
+
+
+Senioren ab Welle 2: (PET0500==.3 bzw. PET0510==-10:
+a) PET0100!=1 (Bezahlt. Taetigkeit mind. 1 Std./Woche?)
+tab PET0500 if welle>1 & PET0100!=1 & fb_vers==3
+N=571 Faelle mit PET0500==-3
+
+b) PET0300==1 (Erwerbs. = TEil der Ausbildung)
+tab PET0500 if welle>1 & PET0300==1 & fb_vers==3
+0 Faelle
+
+c) PET0400==1 (Taetigkeit = öffentl. geför. Beschseftigung)
+tab PET0500 if welle>1 & PET0400==1 & fb_vers==3
+0 Faelle
+
+ansonsten:
+54 Faelle mit PET0500==1
+42 Faelle mit PET0500==2
+
+*/
+* Generierung von Ausuebung eines Minikobs (einkmini1)
+* von Welle 1: PET0500 und Senioren ab Welle 2
+recode PET0500 (2=0) (1=1), gen(einkmini1)
+* fuer Welle 2 bis Welle 6 (ohne Senioren): PET0510
+replace einkmini1=PET0510 if welle>1 & welle<7 & fb_vers!=3
+* Umkodieren der Variable (ohne Senioren), wegen PET0510 2=Nein
+replace einkmini1=0 if PET0510==2 & welle>1 & welle<7 & fb_vers!=3
+
+* einkmini1 labels
+label variable einkmini1 "Ausuebung Minijob - ohne Umkodierung des Filters"
+label define einkmini_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu (Filter)" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1"Ja"
+label value einkmini1 einkmini_lab
+
+* Ueberpruefen
+tab einkmini1, m
+tab einkmini1 PET0500, m
+tab einkmini1 PET0510, m
+
+/*
+ tab einkmini1, m
+
+   Ausuebung Minijob - ohne Umkodierung |
+                            des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+       Frage irrtuemlich nicht gestellt |         50        0.05        0.05 --> 50 Faelle aus Welle 2 mit PET0510==-4
+               trifft nicht zu (Filter) |     12,079       12.78       12.84 --> 8010 Faelle aus W1 mit PET0100!=1 & PET0500==-3
+																			 --> 507 Faelle aus W1 mit PET0300==1 & PET0500==-3
+																			 --> 871 Faelle aus W1 mit PET0400==1 & PET0500==-3
+																			 --> 1067 Faelle (Schueler/Azubis) aus W2
+																			 --> 1053 Faelle (Schueler/Azubis) aus W3
+																			 --> 571 Faelle (Senioren) aus allen Wellen
+                           keine Angabe |         34        0.04       12.87 --> 4 Faelle aus Welle 1
+																			 --> 9 Faelle aus Welle 2
+																			 --> 5 Faelle aus Welle 3
+																			 --> 16 Faelle aus Welle 4-6
+                            Weiss nicht |         38        0.04       12.91 --> 26 Faelle aus Welle 1
+																			 --> 3 Faelle aus Welle 2
+																			 --> 9 Faelle aus Welle 4-6
+                                   Nein |     55,307       58.53       71.45 --> 5950 Faelle aus Welle 1
+																			 --> 8465 Faelle aus Welle 2
+																			 --> 9382 Faelle aus Welle 3
+																			 --> 31468 Faelle aus Welle 4-6
+																			 --> 42 Faelle (Senioren) aus allen Wellen
+                                     Ja |      9,855       10.43       81.88 --> 1757 Faelle aus Welle 1
+																			 --> 1458 Faelle aus Welle 2
+																			 --> 1501 Faelle aus Welle 3
+																			 --> 5085 Faelle aus Welle 4-6
+																			 --> 54 Faelle (Senioren) aus allen Wellen
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+ Missings:
+ tab pnettok welle if einkmini1==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Real. Interv. auf P-E |         0          1          1          1          2          0 |         5 
+Kurzfragbogen auf P-E |     1,483          0          0          0          0          0 |     1,483 
+Ausfall auf P-Ebene,  |     2,934      2,658      3,420      1,892      2,602      2,129 |    15,635 
+----------------------+------------------------------------------------------------------+----------
+                Total |     4,417      2,659      3,421      1,893      2,604      2,129 |    17,123 
+
+*/
+
+* Generierung: Ausuebung eines Minijobs (mit Umkodierung des Filters): einkmini2
+gen einkmini2 = einkmini1
+* Umkodierung derjenigen Faelle, bei denen wir sicher davon ausgehen koennen, dass sie tatsaechlich keinen Minijob ausueben:
+* a) Senioren ohne  mind. 1 bezahlte Std. / Woche. - alle Wellen; Senioren mit PET0100==WN / KA bleiben auf -3
+replace einkmini2 = 0 if fb_vers==3 & PET0100==2
+* b) Personen der Welle 1: ohne  mind. 1 bezahlte Std. / Woche; diejenigen mit PET0100==WN / KA bleiben auf -3
+replace einkmini2 = 0 if fb_vers!=3 & PET0100==2 & welle==1
+* c) Personen der Welle 1: mit öffentl. gef. Beschaeftigung
+replace einkmini2 = 0 if fb_vers!=3 & PET0400==1 & welle==1
+
+* Bei Personen der Welle 1: mit Erwerbstaetigkeit = Teil der Ausbildung: könnte sein, dass sie ihr Gehalt als Minijob erhalten, oder?, daher: bleiben auf -3
+* Schueler und Auszubildene der Welle 2 und 3: bleiben auf -3
+
+* einkmini2 labels
+label variable einkmini2 "Ausuebung Minijob - mit Umkodierung des Filters"
+label value einkmini2 einkmini_lab
+
+* Ueberpruefen
+tab einkmini2, m
+tab einkmini2 PET0500, m
+tab einkmini2 PET0510, m 
+
+/*
+ tab einkmini2, m
+
+                              einkmini2 |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+       Frage irrtuemlich nicht gestellt |         50        0.05        0.05 --> siehe einkmini1
+               trifft nicht zu (Filter) |      2,650        2.80        2.86 --> 22 Faelle aus W1 mit PET0100(-1/-2) & PET0500==-3
+																			 --> 507 Faelle aus W1 mit PET0300==1 & PET0500==-3
+																			 --> 1067 Faelle (Schueler/Azubis) aus W2
+																			 --> 1053 Faelle (Schueler/Azubis) aus W3
+																			 --> 1 Fall (Senior_in) aus Wellen 2-6 mit PET0100(-1/-2)
+                           keine Angabe |         34        0.04        2.89 --> siehe einkmini1
+                            Weiss nicht |         38        0.04        2.93 --> siehe einkmini1
+                                   Nein |     64,736       68.51       71.45 --> 55307 von einkmini1
+																			 --> 871 Faelle aus W1 mit PET0400==1 & PET0500==-3
+																			 --> 570 Faelle (Senioren) aus allen Wellen 2-6 mit PET0100==2
+																			 --> 7988 Faelle aus Welle 1 mit PET0100==2
+                                     Ja |      9,855       10.43       81.88 --> siehe einkmini1
+                                      . |     17,123       18.12      100.00 --> siehe einkmini1
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+
+/* Generierung: Verdienst vom Minijob: einkminihoehe1
+
+Fuer Welle 1: "PET0600": P 29  (PET0600) Mini-Jobber (von P 28= 1) Und wie viel verdienen Sie da genau?  
+<Wenn  P  25=2  ergänzen>  Falls  Sie  mehrere  Mini-Jobs  haben,  zählen  Sie  bitte  alles zusammen
+(siehe Doku, Personen-FB - Welle 1)
+
+Fuer Welle 2-6: "PET0610" (Alle Befragten, egal ob (noch) andere Erwerbstaetigkeit)
+im FB: Und wie hoch war Ihr Einkommen für diesen Mini-Job im letzten Monat? Bei mehreren
+Mini-Jobs zählen Sie bitte alle zusammen.(aus Doku, Personen-FB - Welle 4)
+
+Filter: Beantwortet, wenn
+in W1: PET0500==1, außer Senioren(fb_vers==3)
+in W2-W6: PET0510==1 (keine Senioren) oder 
+		PET0500==1 & fb_vers==3(Senioren ab Welle 2)
+
+Filter ueberpruefen:
+W1
+* Alle Faelle (die keine Senioren sind) der Welle 1 mit PET0500==1 haben gueltige Werte bei PET0510
+tab PET0600 if welle==1 & PET0500==1 & fb_vers!=3
+--> 1662 Faelle mit PET0600>0 
+--> 55 Faelle mit PET0600==-1  
+--> 34 Faelle mit PET0600==-2  
+
+* Alle Faelle (die keine Senioren sind) der Welle 1 mit PET0500==-1|-2|2|-3 sind auf PET0600==-3
+tab PET0600 if welle==1 & fb_vers!=3 & (PET0500==-1 | PET0500==-2 | PET0500==2 | PET0500==-3)
+--> 15204 Faelle mit PET0600==-3 
+
+* Alle Senioren der WElle 1 sind auf PET0600==-10
+tab PET0600 if welle==1 & fb_vers==3 
+--> 170 Faelle mit PET0600==-10
+	
+W2-W6:
+* Alle Faelle der Welle 2-6 (inkl. Senioren) mit PET0500==1 oder PET0510==1 haben gueltige Werte bei PET0610
+tab PET0610 if welle>1 & welle<7 & (PET0500==1 | PET0510==1)
+--> 7959 Faelle mit PET0610>0 
+--> 82 Faelle mit PET0610==-1  
+--> 57 Faelle mit PET0610==-2 
+
+* Alle Faelle der Welle 2-6 (inkl. Senioren) mit PET0500/PET0510==-1|-2|2 sind auf PET0610==-3
+tab PET0610 if welle>1 & welle<7 & (PET0510==-1 | PET0510==-2 | PET0510==2 | PET0510==-3 | PET0500==-1 | PET0500==-2 | PET0500==2| PET0500==-3 )
+--> 52090 Faelle mit PET0610==-3 
+
+* Alle Faelle der Welle 2-6 (inkl. Senioren) mit PET0500/PET0510==-4 sind auf PET0610==-4
+tab PET0610 if welle>1 & welle<7 & (PET0510==-4 | PET0500==-4) 
+--> 50 Faelle mit PET0610==-4
+
+*/
+
+* Generierung von einkminihoehe1
+* Alle Befragten von Welle 1
+gen einkminihoehe1=PET0600 if welle==1
+* Befragte der Welle 2-6(inkl. Senioren)
+replace einkminihoehe1=PET0610 if welle>1 & welle<7 
+* Umkodierung: Senioren der Welle 1 ohne Ausuebung eines Minijobs (PET0500==-3 | PET0500==2) werden auf einkminihoehe1==-3 umkodiert,
+*da diese die Frage nicht haetten gestellt bekommen aufgrund des Filters
+replace einkminihoehe1=-3 if welle==1 & fb_vers==3 & (PET0500==-3 | PET0500==2)
+
+* einkminihoehe1 labels
+label variable einkminihoehe1 "Verdienst Minijob - ohne Umkodierung des Filters"
+label define einkminihoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu (Filter)" -2 "keine Angabe" -1 "Weiss nicht"
+label value einkminihoehe1 einkminihoehe_lab
+
+* Ueberpruefen
+tab einkminihoehe1, m
+tab einkminihoehe1 einkmini1, m
+tab einkminihoehe1 PET0500, m
+tab einkminihoehe1 PET0510, m 
+
+/*
+           
+. tab einkminihoehe1, m
+
+   Verdienst Minijob - ohne Umkodierung |
+                            des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |          6        0.01        0.01 --> 6 Senioren der Welle 1 mit Ausuebung eines Minijobs (PET0500==1 & fb_vers==3 & welle==1)
+       Frage irrtuemlich nicht gestellt |         50        0.05        0.06 --> siehe einkmini1
+               trifft nicht zu (Filter) |     67,458       71.39       71.45 --> 164 umkodierte Faelle bzw. Senioren der Welle 1 OHne Ausuebung eines Minijobs (PET0500==2 | PET0500==-3) 
+																			 --> 52090 Faelle der Welle 2-6 (ohne Ausuebung eines Minijobs oder mit KA/WN/-3 auf die Frage nach der Ausü. eines Minijobs)
+																			 --> 15204 Faelle der Welle 1 (ohne Ausuebung eines Minijobs oder mit KA/WN/-3 auf die Frage nach der Ausü. eines Minijobs) mit PET0600==-3 
+                           keine Angabe |         91        0.10       71.55 --> 34 Faelle aus Welle 1 mit Ausuebung eines Minijobs
+																			 --> 57 Faelle aus Welle 2-6 mit Ausuebung eines Minijobs
+                            Weiss nicht |        137        0.14       71.70 --> 55 Faelle aus Welle 1 mit Ausuebung eines Minijobs
+																			 --> 82 Faelle aus Welle 2-6 mit Ausuebung eines Minijobs
+                          0 bis 800 Euro        9621 						 --> 1662 aus Welle 1 mit Ausuebung eines Minijobs
+																			 --> 7959 aus Welle 2-6 mit Ausuebung eines Minijobs
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+
+
+*/
+
+
+* Generierung von einkminihoehe2 -  mit Umkodierung des Filters gemaeß einmini2
+gen einkminihoehe2=einkminihoehe1
+replace einkminihoehe2=0 if einkmini2==0
+* einkminihoehe2 labels
+label variable einkminihoehe2 "Verdienst Minijob - mit Umkodierung des Filters"
+label define einkminihoehe2_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu (Filter)" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Verdienst"
+label value einkminihoehe2 einkminihoehe2_lab
+
+* Ueberpruefen
+tab einkminihoehe2, m
+tab einkminihoehe1 einkmini1, m
+tab einkminihoehe1 PET0500, m
+tab einkminihoehe1 PET0510, m 
+
+/*
+tab einkminihoehe2, m
+
+Verdienst Minijob - mit Umkodierung des |
+                                Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |          6        0.01        0.01 --> siehe einkminihoehe1
+       Frage irrtuemlich nicht gestellt |         50        0.05        0.06 --> siehe einkminihoehe1
+               trifft nicht zu (Filter) |      2,722        2.88        2.94
+                           keine Angabe |         91        0.10        3.04 --> siehe einkminihoehe1
+                            Weiss nicht |        137        0.14        3.18 --> siehe einkminihoehe1
+                         kein Verdienst |     64,884       68.67       71.85 --> 148 Faelle mit einkminihoehe1==0
+																			 --> 55307 von einkmini1==Nein
+																			 --> 871 Faelle aus W1 mit PET0400==1 & PET0500==-3
+																			 --> 570 Faelle (Senioren) aus allen Wellen 2-6 mit PET0100==2
+																			 --> 7988 Faelle aus Welle 1 mit PET0100==2
+                                 1 bis     9473
+                                    800 |         				       81.88
+                                      . |     17,123       18.12      100.00 --> siehe einkminihoehe1
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+* Gruppierte Variablen zum Verdienst aus Minijob
+* Anzeigen von Quintilen
+sum einkminihoehe1 if einkminihoehe1>=0 & einkminihoehe1<=800 , detail
+sum einkminihoehe2 if einkminihoehe2>=0 & einkminihoehe2<=800 , detail
+
+gen einkminihoehe1_p = einkminihoehe1
+replace einkminihoehe1_p = 1 if einkminihoehe1>=0 & einkminihoehe1<=100
+replace einkminihoehe1_p = 2 if einkminihoehe1>=101 & einkminihoehe1<=200
+replace einkminihoehe1_p = 3 if einkminihoehe1>=201 & einkminihoehe1<=361
+replace einkminihoehe1_p = 4 if einkminihoehe1>361 & einkminihoehe1<=800
+
+* einkminihoehe1_p labels
+label variable einkminihoehe1_p "Verdienst Minijob grup. - ohne Umkodierung des Filters"
+label define einkminihoehe1_p_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu (Filter)" -2 "keine Angabe" -1 "Weiss nicht" 1 "0-100" 2 "101-200" 3 "201-361" 4"362-800"
+label value einkminihoehe1_p einkminihoehe1_p_lab
+
+* Uberpruefung
+tab einkminihoehe1_p, m
+tab einkminihoehe1 einkminihoehe1_p, m
+
+/*
+tab einkminihoehe1_p, m
+
+         Verdienst Minijob grup. - ohne |
+                Umkodierung des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |          6        0.01        0.01
+       Frage irrtuemlich nicht gestellt |         50        0.05        0.06
+               trifft nicht zu (Filter) |     67,458       71.39       71.45
+                           keine Angabe |         91        0.10       71.55
+                            Weiss nicht |        137        0.14       71.70
+                                  0-100 |      2,431        2.57       74.27
+                                101-200 |      2,566        2.72       76.98
+                                201-361 |      2,220        2.35       79.33
+                                362-800 |      2,404        2.54       81.88
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+* Gruppierte Variablen zum Verdienst aus Minijob: einkminihoehe2_p
+* Anzeigen von Quintilen
+sum einkminihoehe2 if einkminihoehe2>0 & einkminihoehe2<=800 , detail
+* ich lasse aufgrund der bessere Vergleichbarkeit, die GRenzwerte (p.) von einkminihoehe1_p
+
+gen einkminihoehe2_p = einkminihoehe2
+replace einkminihoehe2_p = 0 if einkminihoehe2==0
+replace einkminihoehe2_p = 1 if einkminihoehe2>0 & einkminihoehe2<=100
+replace einkminihoehe2_p = 2 if einkminihoehe2>=101 & einkminihoehe2<=200
+replace einkminihoehe2_p = 3 if einkminihoehe2>=201 & einkminihoehe2<=361
+replace einkminihoehe2_p = 4 if einkminihoehe2>361 & einkminihoehe2<=800
+
+* einkminihoehe2_p labels
+label variable einkminihoehe2_p "Verdienst Minijob grup. - mit Umkodierung des Filters"
+label define einkminihoehe2_p_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu (Filter)" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Verdienst" 1 "1-100" 2 "101-200" 3 "201-361" 4"362-800"
+label value einkminihoehe2_p einkminihoehe2_p_lab
+
+* Uberpruefung
+tab einkminihoehe2_p, m
+tab einkminihoehe2 einkminihoehe2_p, m
+
+
+/*
+. tab einkminihoehe2_p, m
+
+          Verdienst Minijob grup. - mit |
+                Umkodierung des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |          6        0.01        0.01
+       Frage irrtuemlich nicht gestellt |         50        0.05        0.06
+               trifft nicht zu (Filter) |      2,722        2.88        2.94
+                           keine Angabe |         91        0.10        3.04
+                            Weiss nicht |        137        0.14        3.18
+                         kein Verdienst |     64,884       68.67       71.85
+                                  1-100 |      2,283        2.42       74.27
+                                101-200 |      2,566        2.72       76.98
+                                201-361 |      2,220        2.35       79.33
+                                362-800 |      2,404        2.54       81.88
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+*/
+
+*tabellieren, einkmini-Variablen
+*gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkmini1 einkmini2 einkminihoehe1_p einkminihoehe2_p{
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+* 
+exit
+
+
+* andere Einkommensarten
+/* a) Unterhalt bzw. U-Vorschuss
+Es gibt nur: Unterhaltsvorschuss, diesen bekommt man fuer Kinder unter 12Jahren.
+Bei der Variablen HEK1800 ("Und erhalten Sie für eines oder mehrere Kinder Unterhaltsvorschuss vom Jugendamt?")ist der Filter eingebaut, 
+ob im HH mind. 1 Kind unter 13 Jahren lebt (KINDU13==1).
+Die Frage nach der Hoehe des Unterhalts, wurde erst ab Welle 2 erfragt.
+---> Frage: Und erhalten Sie für eines oder mehrere Kinder Unterhaltsvorschuss vom Jugendamt? 
+
+---------------------------------------------------------------------------------------------------------------------------------
+HEK1800         byte   %42.0g      janein     Indikator: Erhalt Unterhaltsvorschuss
+HEK1810         int    %42.0g      HEK4stell_lb
+                                              Unterhaltsvorschuss: Hoehe d. mon. Betrags
+
+Ich habe den Filter im HHENDDAT ueberprueft, bin auf einen falsch kodierten Fall, sind alle Personen ohne Kinder unter 13 im HH auf "trifft nicht zu wegen Filter" (HEK1800)
+daher wuerde ich die Variable nun so kodieren:
+
+Filter ueberpruefen
+* Frage in allen Wellen
+tab HEK1800 welle, m
+---> Frage in allen WEllen gestellt
+
+* Frage (wg. Filter) nicht gestellt an Befragte in HH OHNE Kindern unter 13 J.
+ tab HEK1800 if kindu13==0
+ ---> 66075 Faelle haben HEK1800==-3 - ok!
+ ---> 2 Faelle mit HEK1800==2 - problematisch!
+ ---> 14 Faelle mit HEK1800==-4 (Frage irrt. nicht gestellt) - problematisch!
+
+Nachforschung zu den 2 Faellen:
+list pnr hnr sex alter pnettok pnettod welle kindu13 HEK1800 hhtyp hhgr kindu4 kindu13 kindu15 epartner famstand ekinu18 ekind kindzges kindzihh if HEK1800==2 & kindu13==0
+hnr: 20002008, pnr: 2000200801, 2 Personen, unklarer hhtyp, eine geschiedene 49 jaehrigen Frau, ohne eigenes Kind und ohne Kinder im HH, allerdings  kindzges==Gen. nicht moeglich
+und kindzihh==.
+hnr: 20002008, pnr: 2000200801, ein 23 jaehriger Mann, ohne eigene Kinder
+---> hier haette der Filter greifen müssen, deshalb: Umkodieren auf -3
+
+Nachforschung zu den 14 Faellen:
+list pnr hnr sex alter pnettok pnettod welle kindu13 HEK1800 hhtyp hhgr kindu4 kindu13 kindu15 epartner famstand ekinu18 ekind kindzges kindzihh if HEK1800==-4 & kindu13==0
+pnr: 1001299603, hnr: 5204044, (W3) 41 jaehriger Mann, 1 Eltern - bzw. 2 Personen HH, aber es ist keine weitere PErson in diesem HH registriert und
+Person hat kein Kind, weder ein eigenes, noch andere im HH oder außerhalb des HH., hat in W1 in einem MehrgeneratinoenHH gelebt
+...
+lohnt sich nicht, da diese Faelle ohnehin nicht wichtig sind.
+--> letztlich wuerde ich diese Faelle auf -3 umkodieren
+
+* Frage gestellt an Befragte in HH MIT Kindern unter 13 J.
+ tab HEK1800 if kindu13==1
+---> 163 Faelle mit HEK1800==-4
+---> 6 Faelle mit HEK1800==-3 - problematisch! 
+---> 28226 Faelle mit Antworten HEK1800 (-2 / +2)
+
+Nachforschung zu den 6 Faelle (3HH) mit kindu13=ja und dennoch auf HEK1800==-3
+list pnr hnr sex alter pnettok welle kindu13 HEK1800 hhtyp hhgr  kindu4 kindu13 kindu15 epartner famstand ekinu18 ekind kindzges kindzihh if HEK1800==-3 & kindu13==1
+* hnr: 10010184: Ehepaar mit Kind unter 13 (sogar unter 4 J.) im HH, beide Elternteile haben ein Kind und dieses Kind lebt im gemeinsamen HH ---> kann infolge dessen kein U-Vorschuss bekommen! 
+* hnr 20002395: Paar mit einem Kind (hhtyp, Kind sogar unter 4 J., nach famstand: ledig, 1 Elternteil mit Aufall auf P-Ebene, aber weiter im HH (pnettok)  --->  daher auch kein Uvorschuss (Ein ELternteil: Interviewausfall)
+* hnr: 20006452: Paar mit Kind (hhtyp), Kind unter 13 J, ein Kind, das lebt im HH, 1 Elternteil mit Aufall auf P-Ebene, aber weiter im HH (pnettok)
+* ---> Da alle HH offenbar Paare mit Kindern sind, kann ein Bezug von U-Vorschuss ausgeschlossen werden!
+
+ Konstruktion verschiedener U-vorschuss-Variablen:
+1. einkuhaltv2 nicht binaer,mit allen Antworten derer, die die Frage beantwortet haben, also -2 bis 1, ohne Umkodiert derjenigen mit HEK1800==-3
+2. einkuhaltv1 binaer (0/1) einfach uebernommen, ohne Umkodiert derjenigen mit HEK1800==-3
+3. einkuhaltv3 binaer (0/1) mit Umkodiert derjenigen mit HEK1800==-3 
+3. einkuhaltv4 nicht binaer, mit Umkodiert derjenigen mit HEK1800==-3 , mit allen Antworten derer, die die Frage beantwortet haben, also -2 bis 1
+*/
+*********** Tanja: tab einkuhaltv,gen(einkuhaltv_d)
+
+* Generierung U-vorschuss-Variablen 1:
+recode HEK1800 (2=0) (1=1), gen (einkuhalt1)
+
+* Umkodieren von besonderen Faellen
+* 6 Faelle mit HEK1800==-3 obwohl Kind unter 13 J. im HH lebt ---> umkodieren auf einkuhalt1==-4 setzen
+* 2 Faelle ohne Kinder  im HH, ohne Kinder insg., die aber HEK1800==2 haben ---> Umkodieren auf einkuhalt1==-3
+* 14 Faelle mit HEK1800==-4, obwohl sie keine Kinder u. 13 J. im HH haben (kindu13==0) ---> umkodieren auf einkuhalt1==-3
+replace einkuhalt1=-4 if kindu13==1 & HEK1800==-3
+replace einkuhalt1=-3 if HEK1800==2 & kindu13==0
+replace einkuhalt1=-3 if HEK1800==-4 & kindu13==0
+
+* einkuhalt1 labels
+label variable einkuhalt1 "Unterhaltsvorschuss, Bezug - n. binaer"
+label define einkuhalt_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "Ja" 
+label value einkuhalt1 einkuhalt_lab
+
+* Ueberpruefen anahand von HEK1800
+tab einkuhalt1,m
+tab einkuhalt1 HEK1800
+tab einkuhalt1 HEK1800, m
+
+/*
+tab einkuhalt1,m
+
+ Unterhaltsvorschuss, Bezug - n. binaer |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+       Frage irrtuemlich nicht gestellt |        169        0.18        0.18 ---> 163 Faelle mit Kindern unter 13 im HH
+																			 --->   6 umkodierte Faelle, haben kindu13==1, aber HEK1800==-3
+             trifft nicht zu wg. Filter |     66,091       69.95       70.13 --->66075 Faelle haben kindu13==0 und desw. HEK1800==-3
+																			 --->    2 umkodierte Faelle, haben kindu13==0, aber HEK1800==2
+																			 --->   14 umkodierte Faelle, haben kindu13==0, aber HEK1800==-4
+                           keine Angabe |          3        0.00       70.13 ...
+                            Weiss nicht |         57        0.06       70.19 ...
+                                   Nein |     25,298       26.77       96.96 ...
+                                     Ja |      2,868        3.04      100.00 ---> insg. 28226 Faelle mit kindu13==1, haben HEK1800 beantw. (-2/2)
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+* Konstruktion U-vorschuss-Variablen 2:
+* Auf Missing setzen, wer HEK1800 -10/-1
+gen einkuhalt2 = einkuhalt1
+
+* einkuhalt2 labels
+label variable einkuhalt2 "Unterhaltsvorschuss, Bezug - binaer"
+label value einkuhalt2 einkuhalt_lab
+
+* Konstruktion U-vorschuss-Variablen 3: einkuhalt3
+* hier werden diejenigen mit keinen Kindern unter 13 im HH (Filter) von HEK1800==-3 auf 0 fuer kein Unterhaltsbezug gesetzt
+gen einkuhalt3 = einkuhalt1
+replace einkuhalt3=0 if kindu13==0
+
+* einkuhalt3 labels
+label variable einkuhalt3 "Unterhaltsvorschuss, Bezug - n. binaer, Filter umkodiert."
+label value einkuhalt3 einkuhalt_lab
+
+* Ueberpruefen:
+tab einkuhalt3, m
+tab einkuhalt3 HEK1800, m
+
+/*
+. tab einkuhalt3, m
+
+Unterhaltsvorschuss, Bezug - n. binaer, |
+                      Filter umkodiert. |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+       Frage irrtuemlich nicht gestellt |        169        0.18        0.18 ---> 163 Faelle mit Kindern unter 13 im HH
+																			 --->   6 umkodierte Faelle, haben kindu13==1, aber HEK1800==-3
+                           keine Angabe |          3        0.00        0.18 ---> siehe: einkuhalt1
+                            Weiss nicht |         57        0.06        0.24 ---> siehe: einkuhalt1 
+                                   Nein |     91,389       96.72       96.96 ---> 25298 Faelle mit HEK1800==2
+																			 ---> 66091 umkodierte Faelle, von einkuhalt1==-3 da kindu13==0
+                                     Ja |      2,868        3.04      100.00 ---> siehe: einkuhalt1
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+*/
+
+*  Konstruktion U-vorschuss-Variablen 4: einkuhalt4
+gen einkuhalt4 = einkuhalt3
+
+* einkuhalt4 labels
+label variable einkuhalt4 "Unterhaltsvorschuss, Bezug - binaer, Filter umkodiert."
+label value einkuhalt4 einkuhalt_lab
+
+
+*tabellieren, der binaeren einkuhalt-Variablen
+*gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkuhalt1 einkuhalt3  {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+* 
+
+* tabellieren, der nicht-binaeren einkuhalt-Variablen
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkuhalt2 einkuhalt4  {
+mvdecode `var', mv(-10/-3)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+* 
+
+*fuer greta mac: excel oeffnen, dann datei oeffnen und alle spalten als text ausweisen lassen!
+
+/* Hoehe ---> erstmal keine Var dazu, da erst ab W2
+* Hoehe Unterhaltsvorschuss, ab Welle 2
+* Frage: Und wie hoch ist der Betrag, den Sie da pro Monat erhalten?
+* Variable anschauen
+tab HEK1810 HEK1800
+tab HEK1810 welle
+tab HEK1810 einkuhaltv
+
+
+gen einkuhaltvhoehe=HEK1810
+* 0 Euro U-Halt, wer keinen U-Vorschuss erhaelt
+replace einkuhaltvhoehe=0 if einkuhaltv==0
+
+
+* einkuhaltvhoehe labels
+label variable einkuhaltvhoehe "Unterhaltsvorschuss, Hoehe, ab W2."
+label define einkuhaltvhoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Unterhalt"
+label value einkuhaltvhoehe einkuhaltvhoehe_lab
+
+* Ueberprufen
+tab einkuhaltvhoehe HEK1810 if HEK1810<0
+*list pnr welle hhtyp epartner kindu13 HEK1800 einkuhaltv HEK1810 einkuhaltvhoehe
+* Es sind nun auf Faelle der Welle 1 umkodiert, wo kein Kind unter 13 J. im HH lebt, denn gibt es kein Erhalt von U-Vorschuss
+* und anstatt bei Welle 1 auf der Variablen HEK1810 "In Welle nicht erhoben" stehen zu haben, gibt die neu generierte Variable einkuhaltvhoehe=kein Unterhalt (0) an.
+* auf einkuhaltvhoehe==-3: Personen, die bei der Frage nach dem Erhalt von Unterhalt -1 (WN) oder -2 (keine Angabe) angegeben haben 
+
+tab einkuhaltv if einkuhaltvhoehe==-3
+*/
+
+
+/* b) Vermietung/Verpachtung - Variable erst ab WElle 2 erhoben!!!
+(HEK2000) *alle HH - ohne Filter! (aus Doku W2)
+Frage: "Hat Ihr Haushalt regelmäßige Einkünfte aus der Vermietung oder Verpachtung von Häusern, 
+Wohnungen oder Grundstücken?" 
+
+Filter ueberpruefen
+tab HEK2000 welle, m
+---> alles ok!
+*/
+
+recode HEK2000 (2=0) (1=1), gen(einkmiete)
+
+* einkmiete labels
+label variable einkmiete "Miete/Verpacht, Bezug ab W2."
+label define einkmiete_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "ja" 
+label value einkmiete einkmiete_lab
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkmiete  {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/* Miethohe - Var vorerst unwichtig!
+gen einkmietehoehe = HEK2100
+* Wer kein Einkommen erzielt, der ist auch bei der Hoehe auf Null.  --> rekodiert von -3 auf 0!
+replace einkmietehoehe=0 if einkmiete==0 
+* -3: nur wer bei HEK2000 -1 oder -2 oder Nein hat
+
+* einkmietehoehe labels
+label variable einkmietehoehe "Miete/Verpacht,Hoehe ab W2."
+label define einkmietehoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -5 "Mehr als 9.999,- Euro" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Einkommen" 
+label value einkmietehoehe einkmietehoehe_lab
+
+* Ueberpruefung
+tab einkmiete HEK2000
+tab einkmietehoehe HEK2100 if HEK2100<5
+* list pnr welle HEK2000 HEK2100 einmiete einkmietehoehe
+
+*/
+
+/* Kindergeld - gibt es fuer alle Wellen!
+Nur INfo fuer wie viele Kinder Kindergeld bezogen wird, leider keine Angaben zum Betrag. Liesse sich aber nachberechnen, 
+da immer nur eine Person Kindergeld beziehen kann. Allerdings kann natürlich praktisch das Kindergeld zwischen 2 Elternteilen auch aufgeteilt werden.
+
+HEK1500         byte   %42.0g      janein     Indikator: Erhalt Kindergeld
+HEK1600         byte   %42.0g      metric     Kindergeld: Anzahl der beziehenden Kinder
+
+HEK1500
+Filter: Die Frage, ob Kindergeld erhalten wird, wird nur gestellt, wenn im HH kein(!!) Kind unter 15 Jahren (KINDU15=0) lebt!
+"Kommen  wir  jetzt  zu  einem  anderen  Thema.  Erhält  Ihr  Haushalt  gegenwärtig  Kindergeld? 
+Denken Sie dabei bitte auch an Kinder, die nicht hier im Haushalt wohnen, für die Sie aber 
+trotzdem Kindergeld erhalten."
+
+Frage (HEK1600)
+Filter: Wenn im HH mind. 1 Kind unter 15 Jahren (KINDU15=1) lebt!, oder: wenn kein Kind unter 15J im HH lebt, aber der HH trotzdem fuer Kinder K-geld bezieht (HEK1500==1)
+"Kommen  wir  jetzt  zu  einem  anderen  Thema.  Für  wie  viele  Kinder  erhält  Ihr  Haushalt 
+Kindergeld?" 
+
+Filter:
+kindu15==ja   ---> HEK1600
+
+kindu15==nein ---> HEK1500, if HEK1500==ja   ---> HEK1600
+kindu15==nein ---> HEK1500, if HEK1500==nein ---> HEK1600==-3
+
+Filter ueberpruefen:
+tab HEK1500 welle, m
+
+* Alle mit kindu15==1, muessten eine -3 auf HEK1500 haben
+tab HEK1500 if kindu15==1
+--> 32417 Faelle mit HEK1500==-3
+--> 21 Faelle mit HEK1500==1 (Ja) --> problematisch
+--> 5 Faelle mit HEK1500==2 (Nein) --> problematisch
+
+Nachpruefen der 26 Faelle:
+- die 5 "Nein"-Faelle haben bei HEK1600==-3
+- die 21 Faelle haben gueltige Antworten bei HEK1600
+---> insg. ist nicht schlimm, wenn die Frage HEK1500 der Frage HEK1600 vorgeschaltet ist
+
+* Alle mit kindu15==1, muessten gueltige Werte auf HEK1600 haben
+tab HEK1600 if kindu15==1
+--> 10 Faelle mit HEK1600==-8 (unplausibler Wert)
+--> 37 Faelle mit HEK1600==-4 (Frage irrt. nicht gestellt)
+--> 5 Faelle mit HEK1600==-3 * das sind die oben genannten Faelle mit kindu15==ja und HEK150==Nein
+--> 32391 Faelle mit gueltigen Antworten HEK1600 (-2/2)
+
+* Alle mit kindu15==0, muessten gueltige Werte auf HEK1500 haben
+tab HEK1500 if kindu15==0
+--> 68 Faelle mit HEK1500==-4 (Frage irrt. nicht gestellt)
+-->  2 Faelle mit HEK1500==-3 --> problematisch!
+--> 61973 Faelle mit gueltigen ANtworten, davon 20 (HEK1600==-2) und 85 (HEK1600==-1)
+
+Nachforschung zu den 2 Faellen:
+list pnr hnr welle sex alter famstand  kindu15  ekinu18 hhgr kindzges kindzihh HEK1500 HEK1600 if kindu15==0 & HEK1500==-3 
+2 Faelle (1 HH) mit 49-jaehriger Frau und jungen Mann (23J.), es lebt kein Kindu u 15 im HH, hat aber die Frage HEK1500 (-3) nicht gestellt bekommen,
+dafuer aber die Frage HEK1600 mit "1" beantwortet, beide Personen haben kein eigenes Kind im HH.
+--> ich gehe davon aus, dass die Antwort stimmt!
+
+* Alle mit kindu15==0 & HEK1500==1 (ja), muessen gueltige Werte auf HEK1600 haben
+tab HEK1600 if kindu15==0 & HEK1500==1
+von den 18511 Faellen:
+--> 112 Faelle mit HEK1600==-8 (unplausibler Wert)
+--> 18399 Faelle mit gueltigen WErten auf HEK1600 (-2/2)
+
+* Alle mit kindu15==0 & HEK1500==2 (nein), muessen -3 auf HEK1600 haben
+tab HEK1600 if kindu15==0 & HEK1500==2
+--> 43354 Faelle mit HEK1600==-3
+--> 3 Faelle mit HEK1600==-4 - problematisch, mglw. umkodieren!
+
+Nachforschung zu den 3 Faellen:
+list pnr hnr welle sex alter famstand  kindu15  ekinu18 hhgr kindzges kindzihh HEK1500 HEK1600 if kindu15==0 & HEK1500==2 & HEK1600!=-3
+3 HH, alle ohne KInder unter 15 und ohne Kinder im Allgemeinen
+--> umkodieren zu HEK1600==-3
+
+* Alle mit kindu15==0 & HEK1500==-2/-1 (kA, WN), muessen -3 auf HEK1600 haben
+tab HEK1600 if kindu15==0 & (HEK1500==-1 | HEK1500==-2)
+--> 105 Faelle mit HEK1600==-3
+
+* Alle mit HEK1500==Ja duerfen bei HEK1600 nicht den WErt 0 aufweisen, ansonsten widersprechen sich die Antworten!
+tab HEK1600 if kindu15==0 & HEK1500==1
+---> 2 Faelle mit HEK1600==0 ---> problematisch
+
+Nachforschung zu den 2 Faellen:
+list pnr hnr welle sex alter famstand  kindu15  ekinu18 hhgr hhtyp kindzges kindzihh HEK1500 HEK1600 if kindu15==0 & HEK1500==1 & HEK1600==0
+---> ein neu gegruendeter HH aus zwei Personen (23 u 25 Jahre alt)
+---> Paar-HH ohne Kind/er, haben auch beide keine Kinder, aber die 23-jaehrige war in Welle 1 noch in einem HH mit ihrer Mutter, ist dann ausgezogen zu W2 in den neuen HH mit
+dem jungen Mann. Beide haben keine Kinder. Die Mutter gibt ab W2 an, fuer kein Kind Kindergeld zu erhalten und das Kind kann ja nicht selbst 
+Kindergeld beantragen sofern es kein Vollwaise ist, daher wuerde ich davon ausgehen, dass kein Kindergeld bezogen wird!
+---> Umkodieren zu "kein Kindergeld" 
+*/
+
+* Generierung Erhalt von Kindergeld: einkkinder
+* von HEK1500
+gen einkkinder=1 if kindu15==0 & HEK1500==1
+replace einkkinder=0 if kindu15==0 & HEK1500==2
+replace einkkinder=-1 if kindu15==0 & HEK1500==-1
+replace einkkinder=-2 if kindu15==0 & HEK1500==-2
+replace einkkinder=-4 if kindu15==0 & HEK1500==-4
+
+* von HEK1600
+replace einkkinder=1 if kindu15==1 & HEK1600>0 & HEK1600<15
+replace einkkinder=0 if kindu15==1 & HEK1600==0
+replace einkkinder=-1 if kindu15==1 & HEK1600==-1
+replace einkkinder=-2 if kindu15==1 & HEK1600==-2
+replace einkkinder=-4 if kindu15==1 & HEK1600==-4
+replace einkkinder=-8 if kindu15==1 & HEK1600==-8
+
+*Umkodieren der Faelle mit falscher Filterfuehrung
+* 5 Faelle ohne Kindergeld, die faelschlicherweise zunaechst die Frage HEK1500 anstatt direkt die HEK1600 gestellt bekommen haben
+replace einkkinder=0 if kindu15==1 & HEK1600==-3 & HEK1500==2
+* 2 Faelle ohne Kinder u. 15J. im HH, aber mit Kindergeldbezug nach eigenen Angaben
+replace einkkinder=1 if kindu15==0 & HEK1600==1 & HEK1500==-3
+* 3 Faelle mir HEK1600==-4 anstatt -3, da keine Kinder u. 15 J. im HH
+replace HEK1600=-3 if kindu15==0 & HEK1500==2 & HEK1600==-4
+* 2 Faelle widerspruechlichen Antworten, also: mit kindu15==0 & HEK1500==1 und HEK1600==0
+replace einkkinder=0 if kindu15==0 & HEK1600==0 & HEK1500==1
+
+* fuer doku: diejenigen, die bei der Frage danach, fuer wie viele Kinder Kindergeld bezogen wird eine unplausible ANtwort gaben,
+*aber bei HEK1500=1 haben, bleiben bei einkkinder==1!
+*tab einkkinder  if HEK1500==1 & HEK1600==-8
+* N=112 Faelle sind davon betroffen
+
+* einkkinder labels
+label variable einkkinder "Erh. Kindergeld"
+label define einkkinder_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "nein" 1 "ja"
+label value einkkinder einkkinder_lab
+
+* Ueberpruefung
+tab einkkinder, m
+tab einkkinder HEK1500, m
+tab einkkinder kindu15, m
+tab einkkinder HEK1600, m
+
+/*
+tab einkkinder, m
+
+                        Erh. Kindergeld |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                      unplausibler Wert |         10        0.01        0.01 --> 10 Faelle mit kindu15==Ja, HEK1500==-3 und HEK1600==-8 
+																			(insg. sind noch 112 weitere auf HEK1600==-8, aber die haben einen gueltigen Wert auf HEK1500, weshalb dieser Vorrang hat)
+																			 siehe: tab einkkinder HEK1500 if  HEK1600==-8
+	   Frage irrtuemlich nicht gestellt |        105        0.11        0.12 --> 37 Faelle mit kindu15==Ja und HEK1600==-4
+																			 --> 68 Faelle mit kindu15==Nein und HEK1500 sowie HEK1600==-4 	
+																			 siehe: tab  HEK1500  HEK1600 if einkkinder==-4																			 
+                           keine Angabe |         31        0.03        0.15 --> 11 Faelle von HEK1600==-2 & kindu15==1
+																			 --> 20 Faelle von HEK1500==-2 & kindu15==0
+																			  siehe: tab HEK1500 HEK1600 if einkkinder==-2 		
+                            Weiss nicht |        112        0.12        0.27 --> 27 Faelle von HEK1600==-1
+																			 --> 85 Faelle von HEK1500==-1
+																			  siehe: tab HEK1500 HEK1600 if einkkinder==-1 	
+                                   nein |     43,605       46.15       46.42 -->  241 Faelle mit HEK1600==0 & kindu15==1 & HEK1500==-3
+																			 -->    2 (umkodierte) Faelle mit HEK1500==1 & HEK1600==0	
+																			 -->43462 Faelle mit HEK1500==Nein	
+                                     ja |     50,623       53.58      100.00--> 18530 Faelle mit HEK1500==1, davon haben:
+																				18403 Faelle mit HEK1600>=1 & HEK1600<=7	
+																				112 Faelle mit HEK1600==-8
+																				  3 Faelle mit HEK1600==-2
+																				 12 Faelle mit HEK1600==-1 
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+* Generierung: Anzahl Kinder fuer die Kindergeld bezogen wird: einkakinder 
+gen einkakinder = HEK1600 if einkkinder!=0
+* Damit werden einige Umkodierungen uebernommen und die Personen ohne Kindergeld auf -3 (haetten via Filter eigentlich aussortiert werden muessen) gesetzt.
+* letztlich gibt es fuer die Frage keinen richtigen Filter
+replace einkakinder=0 if einkkinder==0
+
+* einkakinder labels
+label variable einkakinder "Anz. Kinder mit Kindergeldbezug"
+label define einkakinder_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Kinderg.bez."
+label value einkakinder einkakinder_lab
+
+* Ueberpruefung
+tab einkakinder, m
+tab einkakinder HEK1600, m
+tab einkakinder HEK1500, m
+
+/*
+tab einkakinder, m
+
+        Anz. Kinder mit Kindergeldbezug |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                      unplausibler Wert |        122        0.13        0.13 --> 10 Faelle mit kindu15==Ja, HEK1500==-3 und HEK1600==-8 
+																			 --> 112 Faelle mit kindu==Nein,HEK1500==gueltiger Wert und HEK1600==-8
+       Frage irrtuemlich nicht gestellt |        105        0.11        0.24 --> 37 Faelle mit kindu15==Ja und HEK1600==-4
+																			 --> 68 Faelle mit kindu15==Nein und HEK1500 sowie HEK1600==-4 	
+             trifft nicht zu wg. Filter |        105        0.11        0.35 --> mit HEK1500==-1 oder -2
+                           keine Angabe |         14        0.01        0.37 ... 
+                            Weiss nicht |         39        0.04        0.41 ...
+                      kein Kinderg.bez. |     43,605       46.15       46.56 --> 243 Faelle mit HEK1600==0 
+																			 --> 43362 Faelle mit HEK1500==2  	
+                                      1 |     23,312       24.67       71.23 ...
+                                      2 |     17,851       18.89       90.12 ...
+                                      3 |      6,468        6.85       96.97 ...
+                                      4 |      1,792        1.90       98.86 ...
+                                      5 |        681        0.72       99.59 ...
+                                      6 |        262        0.28       99.86 ...
+                                      7 |        113        0.12       99.98 ... 
+                                      8 |         13        0.01      100.00 ...
+                                      9 |          2        0.00      100.00 ...
+                                     11 |          2        0.00      100.00 ...
+																			 ... Faelle mit kindu15==0 & HEK1500=1 
+																			     oder 21 Faelle mit kindu15==1 & HEK1500==1
+																				 Faelle mit kindu15==1	 
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+								  
+*/
+* Variable einkakinder gruppiert:
+recode einkakinder (1=1) (2=2) (2/4=3) (5/11=4), gen(einkakinder_g)
+
+* einkakinder_g labels
+label variable einkakinder_g "Anz. Kinder mit Kindergeldbezug - gruppiert"
+label define einkakinder_g_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Kinderg.bez." 1 "1 Kind" 2 "2 Kinder" 3 "3-4 Kinder" 4 "5 und mehr Kinder"
+label value einkakinder_g einkakinder_g_lab
+
+* ueberpruefung
+tab einkakinder einkakinder_g
+tab einkakinder_g, m
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkkinder {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkakinder einkakinder_g {
+mvdecode `var', mv(-10/0)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/* Kinderzuschlag - erst ab Welle 3 erhoben!
+---------------------------------------------------------------------------------------------------------------------------------
+HEK1630         byte   %42.0g      janein     Indikator: Erhalt Kinderzuschlag
+HEK1640         int    %42.0g      metric     Kinderzuschlag: Hoehe des monatlichen Betrags
+
+Filter fuer Variable HEK1630:
+Haushalte mit Kindergeldbezug (HEK1600>0), die gegenwärtig kein ALG2 beziehen (HHALG2_an = 0)!
+
+Frage HEK1630: "Neben dem Kindergeld können Haushalte einen so genannten Kinderzuschlag beantragen,
+um den Bezug von Arbeitslosengeld 2 zu vermeiden. Kinderzuschlag erhält man nur dann,
+wenn man mit seinem Einkommen zwar den eigenen Lebensunterhalt, nicht aber den der
+Kinder decken kann. Bezieher von Arbeitslosengeld 2 bekommen keinen Kinderzuschlag.
+Erhalten Sie oder jemand in Ihrem Haushalt diesen Kinderzuschlag?"
+
+Filter ueberpruefen - geht fuer mich nur mit alg2abez:
+* Mit Kindergeldbezug - Tabellierung ALG2-HEK1630
+tab HEK1630 alg2abez if HEK1600>0 & HEK1600<15 & welle>=3
+- kein ALG2 Bezug:
+--> 3 Faelle mit HEK1630==-2
+--> 37 Faelle mit HEK1630==-1
+--> 908 Faelle mit HEK1630==1
+--> 19081 Faelle mit HEK1630==2
+
+- ALG2-Bezug des HH
+--> 10471 Faelle mit HEK1630==-3
+--> 4 Faelle mit HEK1630==2 ---> problematisch, haetten auf -3 sein muessen!
+
+Nachforschung zu den 4 Faellen:
+list pnr hnr welle sex alter alosgemeldet hhtyp bgbezs bgbezb alg2samp alg2abez alg2  neuAL2060 neuAL20701 neuAL20702 neuAL20703 neuAL20704 neuAL20705 nlb statakt etakt kindu15 HEK1500 HEK1600 HEK1630 if HEK1630==2 & alg2abez==1 & HEK1600>0
+--> 4 Personen des selben HH: 15028291 (in Welle 4) mit ALG2, aber mit Kindergeld, der ALG2 Bezug ist unklar, denn auf die Frage fuer wen in HH ALG2 bezogen wird, wurde in der WElle nicht erhoben.
+bei den AL2-Spells hat der HH nur von Januar 1007 - Maerz 2007 einen ALG2-Bezug, fraglich, warum dann in Welle 4 ein ALG2-Bezug notiert ist.
+--> Entscheidung: ich wuerde davon ausgehen, dass kein ALG2-Bezug vorliegt und deshalb war es auch richtig die Frage HEK1630 zu stellen.
+--> Keine Umkodierung!
+
+- ALG2-Bezug: Generierung nicht moeglich --> unklar, wie der Filter hier angewendet werden sollte
+--> 20 Faelle mit HEK1630==-3
+--> 5 Faelle mit HEK1630==-1
+--> 16 Faelle mit HEK1630==1
+--> 167 Faelle mit HEK1630==2
+* ich wuerde keine Umkodierungen vornehmen
+
+* KEIN Kindergeldbezug - Tabellierung ALG2-HEK1630 ---muessten alle auf HEK1630==-3 sein
+tab HEK1630 alg2abez if HEK1600<=0 & welle>=3
+- ALG2-Bezug des HH
+--> 10513 Faelle auf HEK1630==-3
+
+- KEIN Alg-2 Bezug des HH
+--> 17691 Faelle auf HEK1630==-3
+--> 36 Faelle auf HEK1630==-4 --> problematisch, warum nicht auf -3?
+--> 4 Faelle auf HEK1630==2 --> problematisch, warum nicht auf -3?
+
+Nachforschung zu den 4 Faellen:
+list pnr hnr welle sex alter alosgemeldet hhtyp bgbezs bgbezb alg2samp alg2abez alg2  neuAL2060 neuAL20701 neuAL20702 neuAL20703 neuAL20704 neuAL20705 nlb statakt etakt kindu15 HEK1500 HEK1600 HEK1630 if HEK1630==2 & alg2abez==2 & HEK1600<0
+--> 4 Personen des selben HH: 15028291 (in Welle 5) ohne ALG2, aber mit Kindergeld, da HEK1500==Ja, allerdings unplausibler Wert auf HEK1600
+--> Entscheidung: Es ist davon auszugehen, dass Kindergeld bezogen wird, auch wenn der Fall umkodiert worden ist auf HEK1600==unplausibler WErt, daher war es gerechtfertigt die Frage HEK1630 zu stellen
+--> keine Umkodierung!
+
+Nachforschung zu den 36 Faellen:
+--> bei 34 Faellen wurde die Frage HEK1600 irrtuemlich nicht gestellt und deshalb haette eigentlich die Frage HEK1630 gestellt werden muessen.
+--> bei 2 Faellen:
+pnr: 1001299603, hnr: 35204044 --> 41, jaehriger Mann: keine Kinder, weder eigene noch im HH oder allg. daher auch kindu15==0 & HEK1500==Nein (HEK1600==-3), hhgr: 2!
+im Kinderdatensatz gibt es eine weibliche Person, unklar welchen Alters, deren Vater und Mutter nicht im gleichen HH lebt.  
+pnr: 3320063801, hnr: 33200638 --> 31, jaehriger Mann: keine Kinder, kein ELternteil eines Kinder, kindu15==0 & HEK1500==Nein (HEK1600==-3) hhgr: 2!
+im Kinderdatensatz gibt es eine weibliche Person, unklar, welchen Alters und ansonsten nur fehlende ANgaben
+--> diese 2 Faelle umkodieren zu HEK1630==-3, da anscheinend keine Kinder da sind bzw. zumindest kein Kindergeld bezogen wird!
+
+- ALG2: Generierung nicht moeglich
+--> 165 Faelle auf HEK1630==-3
+--> 7 Faelle auf HEK1630==-4 --> problematisch, warum nicht auf -3?
+
+Nachforschung zu den 7 Faellen:
+list pnr hnr welle sex alter alosgemeldet hhtyp bgbezs bgbezb alg2samp alg2abez alg2  neuAL2060 neuAL20701 neuAL20702 neuAL20703 neuAL20704 neuAL20705 nlb statakt etakt kindu15 HEK1500 HEK1600 HEK1630 if HEK1630==-4 & alg2abez==-5 & HEK1600<0
+--> 3 Personen im HH: 10068151: Obwohl ein Kind unter 15J im HH ist, wurde die Frage HEK1600 irrtuemlich nicht gestellt (HEK1600==-4) und auch die Generierung von alg2abez ist nicht moeglich
+wg. fehlender Werte, dennoch ist auf bgbez==ALG2-Bezug des HH
+--> 4 Personen im HH: 40003034: Obwohl ein Kind unter 15J im HH ist, wurde die Frage HEK1600 irrtuemlich nicht gestellt (HEK1600==-4) und auch die Generierung von alg2abez ist nicht moeglich
+wg. fehlender Werte, dennoch ist auf bgbez==ALG2-Bezug des HH
+--> Entscheidung fuer beide HH: daher kann die Kodierung von HEK1630==-4 uebernommen werden - es liegt wohl v.a. an der ebenso irrtuemlich nicht gestellten Frage HEK1600
+
+*/
+* einkkinderz1: Nur derjenigen, die die Frage beantwortet haben
+* einkkinderz2: mit Umkodierungen von -3
+
+* Umkodierungen:
+* nur 2 Faelle, die angeben kein Kindergeld zu erhalten, von HEK1630==-4 zu HEK1630==-3
+replace HEK1630=-3 if HEK1630==-4 & HEK1600<=0 & alg2abez==2 &kindu15==0 & HEK1500==2
+
+* Generierung einkkinderz1
+recode HEK1630 (2=0) (1=1), gen(einkkinderz1)
+
+* einkkinderz labels
+label variable einkkinderz1 "Erh. Kingergeldzuschlag, ab W3 - ohne Umkodierung!"
+label define einkkinderz1_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "Ja"
+label value einkkinderz1 einkkinderz1_lab
+
+* Ueberpruefung
+tab HEK1630 einkkinderz1, m
+tab einkkinderz1, m
+
+/*
+ Erh. Kingergeldzuschlag, ab W3 - ohne |
+                           Umkodierung! |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+            Item in Welle nicht erhoben |     35,358       37.42       37.42 --> 35358 Faelle aus W1 und W2
+       Frage irrtuemlich nicht gestellt |         41        0.04       37.46 --> 7 Faelle mit alg2abez== GEn n.  moegl & Kein Kindergeldbez (HEK1600<=0)
+																			 --> 34 Faelle mit keinem ALg2 (alg2abez==2) und HEK1600=irrt. nicht gestellt
+             trifft nicht zu wg. Filter |     38,862       41.13       78.59 --> 2 umkodierte Faelle mit keinem ALg2 (alg2abez==2) und Keinem Kindergeldbez (HEK1600<=0, aber HEK1500==Nein) 
+																			 --> 17691 Faelle: Kein Kindergeld + Kein ALG2
+																			 --> 10471 Faelle: Kindergeld +  ALG2 Bezug
+																			 --> 20 Faelle: Kindergeld + ALG2: Gen. n. moeglich
+																			 --> 10513 Faelle: Kindergeld + ALG2 Bezug
+																			 --> 165 Faelle: Kein Kindergeld + ALG2: Gen nicht moeglich
+						   keine Angabe |          3        0.00       78.60 --> 3 Faelle: Kindergeld+kein Alg2
+                            Weiss nicht |         42        0.04       78.64 --> 37 Faelle: Kindergeld+kein Alg2
+																			 --> 5 Faelle: Kindergeld+Alg2: Gen nicht moeglich	
+                                   Nein |     19,256       20.38       99.02 --> 19081 Faelle: Kindergeld+kein Alg2
+																			 --> 167 Faelle: Kindergeld+Alg2: Gen nicht moeglich
+																			 --> 4 Faelle: Kindergeld + ALg2 (aber: es scheint eher kein ALg2 vorzuliegen, siehe oben!)
+																			 --> 4 Faelle: Kein Kindergeld (aber es scheint doch Kindergeld vorzuliegen) + Kein ALg2
+                                     Ja |        924        0.98      100.00 --> 908 Faelle: Kindergeld+kein Alg2 
+																			 --> 16 Faelle: Kindergeld+Alg2: Gen nicht moeglich	
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+* Generierung einkkinderz2
+gen einkkinderz2 = einkkinderz1
+* es kann einfach -3 von einkkinderz1 umkodiert werden, da hier die Faelle mit ALG2-Bezug und/oder keinem Kindergeld drin sind
+* ich wuede allerdings die Faelle mit alg2abez==GEn n. moeglich eher auf -3 belassen.
+replace einkkinderz2=0 if einkkinderz1==-3 & alg2abez!=-5 
+replace einkkinderz2=0 if einkkinderz1==-3 & alg2abez==-5 & HEK1600<=0
+
+* auf einkkinderz2==-3 sind nun noch Faelle, die alg2abez=="Generierung nicht moeglich" haben und Kindergeld bekommen.
+
+* einkkinderz2 labels
+label variable einkkinderz2 "Erh. Kingergeldzuschlag, ab W3 -  mit Umkodierung!"
+label value einkkinderz2 einkkinderz_lab
+
+* UEberpruefung
+tab einkkinderz2, m
+tab einkkinderz2 HEK1630 
+tab HEK1630 HEK1600
+tab einkkinderz2 alg2abez 
+* list  einkkinderz2 HEK1500 HEK1600 HEK1630 einkkinder alg2abez 
+* list  einkkinderz2 HEK1500 HEK1600 HEK1630 einkkinder alg2abez if einkkinderz==-3
+
+/*
+tab einkkinderz2, m
+
+       Erh. |
+Kingergeldz |
+uschlag, ab |
+  W3 -  mit |
+Umkodierung |
+          ! |      Freq.     Percent        Cum.
+------------+-----------------------------------
+         -9 |     35,358       37.42       37.42
+         -4 |         41        0.04       37.46
+         -3 |         20        0.02       37.49 --> 20 Faelle: Kindergeld + ALG2: Gen. n. moeglich										   
+         -2 |          3        0.00       37.66
+         -1 |         42        0.04       37.71
+          0 |     57,933       61.31       99.02 --> 19256 bisherige Nein-ANtworten (siehe oben)
+												 --> 17691 Faelle: Kein Kindergeld + Kein ALG2
+												 --> 10471 Faelle: Kindergeld +  ALG2 Bezug
+												 --> 10513 Faelle: Kindergeld + ALG2 Bezug
+												 --> 2 umkodierte Faelle mit keinem ALg2
+												 --> 165 Faelle: Kein Kindergeld + ALG2: Gen nicht moeglich- nur noch Personen
+         -2 |          3        0.00       37.49
+         -1 |         42        0.04       37.53
+          0 |     58,098       61.49       99.02
+          1 |        924        0.98      100.00
+------------+-----------------------------------
+      Total |     94,486      100.00
+
+
+*/
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkkinderz1 einkkinderz2  {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/* Generierung Hoehe K-zuschlag - derzeit nicht notwendig
+
+gen einkkinderzhoehe = HEK1640 
+replace einkkinderzhoehe=0 if einkkinderz==0
+
+* einkkinderzhoehe labels
+label variable einkkinderzhoehe "Hoehe Kingergeldzuschlag, ab W3!"
+label define einkkinderzhoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Kinderg.zuschlag." 
+label value einkkinderzhoehe einkkinderzhoehe_lab
+
+* ueberpruefen
+tab einkkinderzhoehe 
+tab einkkinderzhoehe HEK1640 if einkkinderzhoehe<1
+tab einkkinderz if einkkinderzhoehe==-3
+* list  einkkinderz einkkinderzhoehe HEK1500 HEK1600 HEK1630 einkkinder alg2abez if einkkinderzhoehe<1 & HEK1640>0
+
+* Problem: 137 Faelle, in denen bei HEK1630==-3 & ALG2 bezogen wird und dennoch ein Wert auf HEK1640 ist
+* Diese sind alle aus W3 und W4
+tab sex if einkkinderzhoehe<1 & HEK1640>0
+tab  welle if einkkinderzhoehe<1 & HEK1640>0
+* In Welle 3 und 4 wurden teilweise Befragte, die bei HEK1630==-3 hatten, dennoch die Frage nach der Hoehe HEK1640 gestellt, nicht mehr allerdings in W5-W6
+* Alle diese HH beziehen ALg2 - dies sind diese 137 Faelle, die bereits bei einkkinderz aufgefallen sind, u.a. auch 1-Eltern-HH wo der eine Elternteil ALG2 bezieht, siehe:
+* list pnr hnr welle alg2 alg2abez sex alter if hnr== 10011081 & welle==3
+* diese umkodieren?!
+*/
+
+
+/* Erziehungsgeld - Elterngeld - Mutterschaftsgeld
+
+nur Welle 1: auf P-Ebene (PENDDAT) erhoben:
+PEK1600         byte   %42.0g      janein     Indikator: Erhalt Erziehungsgeld/Elterngeld?
+--> Filter: Befragte mit Kindern im Haushalt oder außerhalb des Haushalts  
+(von PD0900 = 2|9 or von PD1100), Frage: "Und erhalten Sie Erziehungsgeld oder Elterngeld?" 
+
+PEK1700         int    %42.0g      metric     Erziehungsgeld/Elterngeld: Hoehe des monatlichen Betrags
+--> Befragte mit Erziehungsgeld (PEK1600 = 1), Frage: "Und wie hoch ist der Betrag, den Sie pro Monat erhalten?" 
+
+ab Welle 2: auf HH-Ebene (HHENDDAT) erhoben:
+HEK1610         byte   %42.0g      janein     Indikat.: Erh. Erz.-/Elt.-/Mut.sch.-geld
+---> Filter: if KINDU4 = 1 [alle HH mit Kindern unter 4] 
+	Frage: "Und  erhalten  Sie  oder  jemand  anders  in  Ihrem  Haushalt  Erziehungsgeld,  Elterngeld  oder Mutterschaftsgeld?" 
+
+HEK1620         int    %42.0g      metric     Erz.-/Elt.-/Mut.sch.-geld: Hoehe mon. Betr.
+--> Filter: HEK1610==1
+	Frage: "Und wie hoch ist der Betrag, den Ihr Haushalt da insgesamt pro Monat erhält?" 
+
+Problem: Die beiden Variablen sind nur bedingt "gleich". Ab Welle 2 wird in der Frageformulierung zusätzlich nach Mutterschaftsgeld gefragt 
+und ab Welle 2 werden nur die HH mit Kindern unter 4 Jahren befragt, während in Welle1 alle befragt wurden, die Kinder im HH haben oder außerhalb des HH.
+
+&
+
+einmal auf Personenebene formuliert und einmal auf HH-EBENE!!
+Bedingt koennen aber die Variablen in eine gemeinsame Variable transformiert werden	
+
+Filter ueberpruefen:
+W2-W6:
+* BEfragte mit keinem Kind unter 4 Jahren im HH (kindu4==0) muessten bei HEK1610==-3 haben
+tab HEK1610 if kindu4==0 &  welle>1 & welle<7
+---> 3 Faelle mit HEK1610==2 (nein)
+---> 14 Faelle mit HEK1610==-4 (Frage irrtuenlich n. gestellt)  
+---> 65004 Faelle mit HEK1610==-3  
+
+Nachforschung zu den 3 Faellen
+list pnr hnr welle hhtyp alter  fb_vers hhgr famstand kindzges kindzihh if kindu4==0 &  welle>1 & welle<7 & HEK1610==2
+pnr: 2000180001 ein Kind unter 13 im HH, nicht aber unter 4 J. ---> auf -3 (HEK1610) umkodieren
+--> im Kinderdatensatz wird ersichtlich, das ein Kind mit 12J. und ein Kind mit alter==unplausibler Wert
+--> Entscheidung: NIcht Umkodieren, da das Kind (mit unplausiblen Wert beim ALter) moeglicherweise unter 4 J. ist
+
+pnr: 2000200801 & 2000200802: Ein 2 Personen-HH (hhgr==2), 23 j. Mann und 49 j. Frau, daher kann kein Kind unter 4 Jahren im HH sein
+--> im Kinderdatensatz findet sich auch kein Kind in diesem 2 Personen-HH
+--> Entscheidung: Filter haette greifen muessen, daher: Umkodieren zu einkeltern1==-3 
+
+Nachforschung zu den 14 Faellen:
+list pnr hnr welle sex alter fb_vers hhgr hhtyp famstand kindzges kindzihh if kindu4==0 & welle>1 & welle<7 & HEK1610==-4
+---> diese lass ich vorerst auf -4 oder soll das auf -3 umkodiert werden?
+--> aus dem KINDER-Datensatz wird ersichtlich, dass in diese HH Kinder leben, deren ALter nicht bekannt ist bzw. die bei alter (im Kinderdatensatz) eine -4 (Frage irrt.nicht gestellt) 
+aufweisen. Ich gehe also davon aus, dass deshalb hier eine -4 steht.
+---> Entscheidung: Ich kodiere diese Faelle einkeltern1==-5 (Gen. nicht möglich) um.
+
+* Befragte MIT Kind unter 4 Jahren im HH (kindu4==1) muessten bei HEK1610 gueltige WErte haben
+tab HEK1610 if kindu4==1 &  welle>1 & welle<7
+---> 103 Faelle mit HEK1610==-4
+---> 6 Faelle mit HEK1610==-3 --->problematisch, warum herausgefiltert?
+---> 2 Faelle mit HEK1610==-2
+---> 17 Faelle mit HEK1610==-1
+---> 2458 Faelle mit HEK1610==1
+---> 5337 Faelle mit HEK1610==2
+
+Nachforschung zu den 6 Faellen:
+list pnr hnr welle sex alter hhtyp hhgr famstand kindzges kindzihh kindu4 kindu13 fb_vers if kindu4==1 &  welle>1 & welle<7 & HEK1610==-3
+--> 3 HH, jeweils Paar mit einem Kind, immer ist das Kind unter 4 J.
+--> hnr: 10010184, welle 2, alter (kind): 2 Jahre
+--> hnr: 15000217, welle 2, alter (kind): 0 Jahre
+--> hnr: 20002395, welle 2, alter (kind): 1 Jahr
+---> Entscheidung: ich wuerde umkodieren zu: einkeltern1==-4 (Frage irrt. nicht gestellt)
+
+W1:
+E_Kind: eigenes Kind im HH:
+
+PD0900: Befragte ab 16 J., die Kinder im HH haben (ekind==1)
+Frage: "Haben SIe neben IHren Kindern, die hier im HH wohnen, weitere Kinder, die nicht zum HH gehören? DAmit meinen wir z.B. ältere Kinder,
+die bereits ausgezogen sind, oder Kinder, die bei einer früheren Partnerin bzw. einem früheren Partner wohnen"
+
+PD1000: Befragte ab 16 J., die KEINE Kinder im HH haben (ekind==0)
+Frage: Haben SIe  Kinder, die nicht hier im HH wohnen? DAmit meinen wir z.B. ältere Kinder,
+die bereits ausgezogen sind, oder Kinder, die bei einer früheren Partnerin bzw. einem früheren Partner wohnen"
+
+* Befragte mit PD0900 (-2/2) muessen die Frage PEK1600 beantwortet haben
+tab PEK1600 if PD0900>=-2 & PD0900<=2 & welle==1
+--> 7 FAelle mit PEK1600==-2
+--> 23 FAelle mit PEK1600==-1
+--> 882 FAelle mit PEK1600==1
+--> 6691 FAelle mit PEK1600==2
+--> 54 Faelle mit PEK1600==-3 ---> problematisch
+
+Nachforschung zu den 54 Faellen:
+--> PD0900==2: haben alle keine Kinder außerhalb des HH, davon aber 51 mind. 1 Kind im HH (kindzihh) und 3 auf kindzihh==.
+--> Entscheidung: Diese Faelle wuerde ich umkodieren zu einkeltern1==-4 (Frage irr. nicht gestellt)
+
+* Befragte mit PD0900==-4
+--> gueltige Werte auf PEK1600:
+--> 1 Fall mit PEK1600==1
+--> 1 Fall mit PEK1600==2
+
+* Befragte mit PD0900==-3 und PD1000==-4
+---> 1263 Faelle mit PEK1600==-4
+
+* Befragte mit PD0900==-3 und PD1000==-3
+---> 21 Faelle mit PEK1600==-3 ---> problematisch, warum?
+
+Nachforschung zu den 21 Faellen:
+Diese sind der Variablen palter (PENDDAT) zufolge alle 14 oder 15Jahre alt, hier liegt offensichtlich ein Unterschied zwischen den beiden Altersvariablen vor.
+Daher ist letztlich ok, dass diese Faelle auf PEK1600==-3 sind, denn erst PErsonen ab 16 J. wird die Frage nach Kindern gestellt! 
+--> Enscheidung: Nicht umkodieren!
+
+* Befragte mit PD0900==-3 und PD1000==-2
+---> 11 Faelle mit PEK1600==-3 
+
+* Befragte mit PD0900==-3 und PD1000==1 (Ja)
+---> 4 Faelle mit PEK1600==-1
+---> 21 Faelle mit PEK1600==1
+---> 2726 Faelle mit PEK1600==2
+
+* Befragte mit PD0900==-3 und PD1000==2 (Nein)
+---> 5144 Faelle mit PEK1600==-3
+---> 1 Faelle mit PEK1600==-1--> problematisch
+---> 15 Faelle mit PEK1600==1 --> problematisch
+---> 90 Faelle mit PEK1600==2 --> problematisch
+
+Nachforschungen zu dem 1 Fall:
+---> Ein 39-jaehriger Mann (pnr:: 1201035004) lebt in einem 8-Personen-HH (hnr: 12010350) mit 4 Erwachsenen (ab 16J.) und 3 Kindern (12,11 und 7 J).
+Diese Kinder haben eine Mutter im HH (die hat die pnr: 1201035001), die pnr des Vaters kann nicht generiert werden. Da die Person offensichtlich keine Kinder außerhalb des HH hat,
+haette der Filter gerifen muessen.
+--> unklar, ob der Mann der VAter der Kinder ist oder einfach auch im HH lebt.
+---> Entscheidung: Keine Umkodierung!
+
+Nachforschung zu den 15 Faellen:
+list pnr hnr PEK1600 fb_vers zpsex palter hhgr PD0500 PD0900 PD1000 PD1100 ekind kindzihh kindzges if PD0900==-3 & PEK1600==1  & PD1000==2
+--> dem KINDER-DAtensatz zufolge haben alle diese HH (bis auf einen) mind. 1 Kind im HH, deren ALtern angegeben wird, allerdings
+sind entweder die beiden Eltern der Kinder unklar oder aber die Kinder sind nicht das Kind der Befragungsperson, sondern nur von einem im HH wohnenden Elternteil
+z.B: pnr: 1005606502, weiblich, 36 Jahre alt, hnr: 10056065, PD0900==-3 & PEK1600==1  & PD1000==2
+in diesem HH leben 5 Kinder, 1 MAl: ID von Vater/Muttter im HH: GEN nicht moeglich
+							  bei 4 Kindern: Vater pnr: 1005606501 , Mutter: Gen. nicht moeglich
+	pnr : 1005606501, maennlich, 36 Jahre alt, hnr: 10056065, PD0900==KEine Kinder auß. des HH & PEK1600==2  & PD1000==-3						  
+alle Faelle:							  
+---> kindzges== "Generierung nicht mgl. (fehlende Werte)"
+---> kindzihh==Missing
+---> hhtyp==Missing
+---> ekind==Kein Elternteil eines Kindes
+---> PD1000==kein Elternteil eines Kindes außerhalb des HH
+--> Ist die Frage, ob ekind richtig ist oder die PErson nicht doch MUtter/Vater der im HH lebenden Kinder ist und deshalb Frage bejaht. Moeglicherweise ist EKind==0,
+weil die pnr der Befragungsperson nicht generiert werden konnte.
+---> Entscheidung: Die Hintergrundinfos sind lueckenhaft. ich gehe davon aus, dass die ANtwort der Befragungsperson stimmt, daher: keine Umkodierung
+
+Nachforschung zu den 90 Faellen:
+90 Faelle: Nein             
+--> ich habe stichprobenmaessig nach Kindern im Kinderdatensatz gesucht und bei den betreffenden HH keine Kinder gefunden,
+daher gehe ich davon aus, dass es keine Kinder im HH gibt und deshalb die Frage gar nicht haette gestellt werden duerfen.
+Um die Ergebnisse nicht zu verzerren, wuerde ich die Faelle auf -3 setzen.                    
+---> auf kindzges: 0 oder Gener. nicht möglich & kindzihh: 0 oder Missing.
+---> Entscheidung: wuede ich alle auf einkeltern1=="-3: trifft n. zu wg. Filter setzen", 
+
+einkeltern1 - ohne Umkodierung von -3
+einkeltern2 - mit Umkodierung von -3
+
+*/
+
+* Generierung Erhalt Eltern- und Erziehungsgeld: einkeltern1
+*fuer Welle 1
+recode PEK1600 (2=0) (1=1), gen(einkeltern1) 
+replace einkeltern1 = HEK1610 if welle>1 & welle<=6
+replace einkeltern1 = 0 if HEK1610==2 & welle>1 & welle<=6
+
+* Umkodierungen fuer Welle 1 (siehe oben)
+replace einkeltern1=-4 if PD0900>=-2 & PD0900<=2 & welle==1 & PEK1600==-3
+replace einkeltern1=-3 if PD0900==-3 & PD1000==2 & welle==1 & PEK1600==2
+
+* Umkodierungen fuer Welle 2-6 (siehe oben)
+replace einkeltern1=-3 if kindu4==0 &  welle>1 & welle<7 & HEK1610==2 & pnr==2000200801
+replace einkeltern1=-3 if kindu4==0 &  welle>1 & welle<7 & HEK1610==2 & pnr==2000200802
+replace einkeltern1=-5 if kindu4==0 &  welle>1 & welle<7 & HEK1610==-4
+replace einkeltern1=-4 if kindu4==1 &  welle>1 & welle<7 & HEK1610==-3
+
+* einkeltern1 labels
+label variable einkeltern1 "Erh. Eltern, Erzieh,- Muterschaftsgeld - ohne Umkodierung des Filters"
+label define einkeltern_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -5 "Generierung nicht moeglich"-4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "ja" 
+label value einkeltern1 einkeltern_lab
+
+* Ueberpruefung!
+tab einkeltern1, m
+
+/*
+
+. tab einkeltern1, m
+
+ Erh. Eltern, Erzieh,- Muterschaftsgeld |
+         - ohne Umkodierung des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |        170        0.18        0.18 --> 170 Personen mit Senirenfb der Welle1
+             Generierung nicht moeglich |         14        0.01        0.19 --> 14 umkodierte Faelle von W2-W6, da Alter der Kinder nicht generiert werden konnte
+       Frage irrtuemlich nicht gestellt |      1,426        1.51        1.70 --> 1263 Faelle von Welle 1, mit PD0900==-3 & PD1000==-4
+																			 --> 54 umkodierte Faelle von W1
+																			 --> 6 umkodierte Faelle von W2-W6, (auf HEK1610==-3, obwohl kindu==1)
+																			 --> 103 Faelle von W2-W6 (mit kindu==1)
+             trifft nicht zu wg. Filter |     70,272       74.37       76.08 --> 21 von W1, mit PD0900&PD1000==-3
+																			 --> 11 von W1, mit PD0900==-3 & PD1000==-2
+																			 --> 90 umkodierte Faelle von W1, mit PD0900==-3 & PD1000==2 & PEK1600==2
+																			 --> 5144 von W1, mit PD0900==-3 & PD1000==2 
+																			 --> 65004 Faelle von W2-W6 (inklusive Senioren)
+																			 --> 2 umkodierte Faelle von W2-W6																			 -->
+                           keine Angabe |          9        0.01       76.09 --> 7 von W1, mit PD0900 (-2/2)
+																			 --> 2 Faelle von W2-W6 mit kindu4==1	
+                            Weiss nicht |         45        0.05       76.13 --> 23 von W1, mit PD0900 (-2/2)
+																			 --> 4 Faelle von W1, mitPD0900==-3 & PD1000==1
+																			 --> 1 Faell von W1, mitPD0900==-3 & PD1000==2
+																			 --> 17 Faelle von W2-W6
+                                   Nein |     14,756       15.62       91.75 --> 6691 Faelle von W1, mit PD0900==-2/2
+																			 --> 1 Fall von W1, mit PD0900==-4
+																			 --> 2726 von W1, mit PD0900==-3 & PD1000==1
+																			 --> 5337 W2-W6 mit kindu4==1
+																			 --> 1 Fall von W2-W6 mit kindu4==0
+                                     ja |      3,377        3.57       95.33 --> 882 Faelle von W1, mit PD0900==-2/2
+																			 --> 1 Fall von W1, mit PD0900==-4
+																			 --> 21 Faelle von W1, mit PD0900==-3 & PD1000==1
+																			 --> 15 Faelle von W1, mit PD0900==-3 & PD1000==2 & PEK1600==1
+																			 --> 2458 Faelle von W2-W6 mit kindu4==1
+                                      . |      4,417        4.67      100.00 --> 2934 Ausfall auf P-EBene in W1
+																			 --> 1483 Kurzfb auf P-Ebene in W1
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+								  
+ tab pnettok welle if einkeltern1==.
+
+ Befragungsstatus der |   welle
+   Person (1-Steller) | 1. 2006/2 |     Total
+----------------------+-----------+----------
+Kurzfragbogen auf P-E |     1,483 |     1,483 
+Ausfall auf P-Ebene,  |     2,934 |     2,934 
+----------------------+-----------+----------
+                Total |     4,417 |     4,417 
+
+*/
+
+tab einkeltern1 PEK1600, m
+tab einkeltern1 HEK1610, m
+
+* Generierung Erhalt Eltern- und Erziehungsgeld: einkeltern2
+gen einkeltern2 = einkeltern1
+
+* Umkodieren von einkeltern1==-3
+* --> 21 Befragte u. 16. mit PD0900 & PD1000==-3 & einkeltern1==-3 & welle==1
+replace einkeltern2=0 if PD0900==-3 & PD1000==-3 & einkeltern1==-3 & welle==1
+* 11 Faelle mit "keiner Angabe" bei PD1000 werden nicht umkodiert!
+* 90 Faelle mit PEK1600==2 & PD0900==-3 & PD1000==2
+replace einkeltern2=0 if PD0900==-3 & PD1000==2 & PEK1600==2 & einkeltern1==-3 & welle==1
+* 5144 Faelle aus W1 mit PD0900==-3 & PD1000==2 
+replace einkeltern2=0 if PD0900==-3 & PD1000==2 & einkeltern1==-3 & welle==1
+* 65004 + 2 umkodierte Faelle von W2-W6 mit kindu4==0
+replace einkeltern2=0 if kindu4==0 & einkeltern1==-3 & welle>1 & welle<7
+
+* einkeltern2 labels
+label variable einkeltern2 "Erh. Eltern, Erziehgeld - mit Umkodierung des Filters"
+label value einkeltern2 einkeltern_lab
+
+* ueberpruefen;
+tab einkeltern2, m
+
+/*
+tab einkeltern2, m
+
+          Erh. Eltern, Erziehgeld - mit |
+                Umkodierung des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |        170        0.18        0.18 --> siehe einkeltern1
+             Generierung nicht moeglich |         14        0.01        0.19 --> siehe einkeltern1
+       Frage irrtuemlich nicht gestellt |      1,426        1.51        1.70 --> siehe einkeltern1
+             trifft nicht zu wg. Filter |         11        0.01        1.72 --> 11 Faelle von W1, mit PD0900==-3 & PD1000==-2
+                           keine Angabe |          9        0.01        1.73 --> siehe einkeltern1
+                            Weiss nicht |         45        0.05        1.77 --> siehe einkeltern1
+                                   Nein |     85,017       89.98       91.75 --> 14756 Faelle siehe einkeltern1 
+																		     --> 21 u. 16 Jaehrig von W1, mit PD0900&PD1000==-3
+																			 --> 90 umkodierte Faelle von W1, mit PD0900==-3 & PD1000==2 & PEK1600==2
+																			 --> 5144 von W1, mit PD0900==-3 & PD1000==2 
+																			 --> 65004 Faelle von W2-W6 (inklusive Senioren)
+																			 --> 2 umkodierte Faelle von W2-W6																				 
+                                     ja |      3,377        3.57       95.33 --> siehe einkeltern1
+                                      . |      4,417        4.67      100.00--> siehe einkeltern1
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkeltern1 einkeltern2 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+	
+/* Generierung Hoehe Eltern- und Erziehungsgeld - vorerst nicht relevant 
+*fuer Welle 1
+gen einkelternhoehe = PEK1700 if welle==1
+*fuer Welle 2-6
+replace einkelternhoehe = HEK1620 if welle>1 & welle<=6
+* fuer alle
+replace einkelternhoehe = 0 if einkeltern==0
+	
+* einkelternhoehe labels
+label variable einkelternhoehe "Hoehe Eltern-, Erziehgeld"
+label define einkelternhoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein E-geld" 
+label value einkelternhoehe einkelternhoehe_lab 	
+
+* ueberpruefen!!
+
+tab einkelternhoehe, m	
+tab einkelternhoehe if einkeltern==-1
+tab einkelternhoehe if einkeltern==-2
+tab einkelternhoehe if einkeltern==-3
+tab einkelternhoehe if einkeltern==-4
+tab einkelternhoehe if einkeltern==-5
+
+* list pnr hnr welle PEK1600 HEK1610 PEK1700 HEK1620 einkeltern einkelternhoehe
+*list pnr hnr welle PEK1600 HEK1610 PEK1700 HEK1620 einkeltern einkelternhoehe if einkelternhoehe==. 
+* die 4,417 Befragte mit Missings auf der Variablen, sind entweder Befragte mit einem "Kurzfragbogen auf P-Ebene, HH befr."
+*oder "Ausfall auf P-Ebene" (pnettok)
+*/
+
+* g) Betreuungsgeld  -fuer unsere Daten nicht relevant, da das Betreuungsgeld erst zum 1.8.2013 beschlossen worden ist - Welle 6 geht bis 2012!
+
+/* Waisenrente 
+HEK1700      byte   %42.0g      janein        Indikator: Erhalt Waisenrente o.ae.
+Filter: Alle HH mit Kindern unter 15 Jahren (KINDU15 = 1) 
+Frage:  "Gibt  es  im  Haushalt  Kinder  oder  Jugendliche  unter  15  Jahren,  die  ein  eigenständiges 
+Einkommen haben, z.B. aus Waisenrenten oder eigener Erwerbstätigkeit. Hierzu zählen nicht 
+Taschengeld, Kindergeld oder regelmäßige Unterhaltszahlungen."
+---> hier werden alle Einkommen beruecksichtigt, nicht nur Waisenrente - koennen wir diese Variable dann hinsichtlich der Abfrage von 
+Rentenbezuegen ueberhaupt verwenden? 
+ 
+HEK1710      int    %42.0g      HEK4stell_lb  Waisenrente o.ae.: Hoehe d. mon. Betrags
+---> Erst ab Welle 2!!!
+---> diese Variable ist ebensowenig trennscharf, wie Variable HEK1700, daher koennen wir diese nicht gebrauchen m.M. nach
+
+*/
+
+/* Gesetzliche Altrsrente
+PEK1400a        byte   %42.0g      PEK1400a_lb   Gesetzliche Altersrente oder Alterspension (nur Seniorenbogen; nur Welle 1)
+---> Filter: keiner
+--->  Nur an Personen, die mind. 65 Jahre alt (Seniorenfragebogen) sind. In unserem Sample sind nur Menschen bis 65Jahren, d.h. nur fuer diese koennten
+wir angeben, ob Altersrente bezogen wird. Im FB ab W2 werden alle befragt, die mind. 45Jahre alt sind==Problem.
+--->Frage: "Und jetzt kommen wir kurz zum Thema Rentenzahlungen. Erhalten Sie eine der folgenden Leistung der gesetzlichen Rentenversicherung oder eine entsprechende staatliche Pension? 
+Wenn Sie mehrere dieser Leistungen erhalten, nennen Sie bitte alle.  
+A  Eine gesetzliche Altersrente oder eine Alterspension  
+
+PEK1410         byte   %42.0g      janein     Indikator: Erhalt Altersrente der GRV/Beamtenpension?
+---> erst ab Welle 2!!
+---> Filter: Befragte ab 45Jahren & PEK1400==1 (Erhalt von GEldern der gesetzlichen Rentenversicherung)
+tab palter PEK1410 if PEK1400==1
+----> Frage: "Eine Altersrente der gesetzlichen Rentenversicherung oder eine Beamtenpension?"
+
+Filter ueberpruefen
+W1: PEK1400a - nur Seniorenfb
+tab PEK1400a if welle==1 & fb_vers==3
+--> stimmt, 170 Faelle aus dem Seniorenfb
+tab PEK1400a if welle==1 & fb_vers!=3
+--> stimmt,16,955 Faelle mit "Item in Fragebogenversion nicht erhoben"
+
+W2-W6: PEK1410 - alle ab 45J. mit Erhalt von GEldern der gesetzlichen Rentenversicherung (PEK1400==1)
+tab PEK1410 if welle>1 & welle<7 & alter>=45 & alter<105 & PEK1400==1
+---> 4448 Faelle mit ANtworten - ok!
+tab PEK1410 if welle>1 & welle<7 & alter>=45 & alter<105 & PEK1400==2
+---> 22,901 Faelle mit -3 (da keine Bezuege aus gesetz. REnte)
+tab PEK1410 if welle>1 & welle<7 & alter>=45 & alter<105 & PEK1400==-1
+---> 11 Faelle mit -3 (da -1 bei PEK1400)
+tab PEK1410 if welle>1 & welle<7 & alter>=45 & alter<105 & PEK1400==-2
+---> 10 Faelle mit -3 (da -2 bei PEK1400)
+tab PEK1410 if welle>1 & welle<7 & alter<=44
+---> 32868 Faelle auf -3 (da unter 45J.)
+
+--> alle Filter sind korrekt angewendet worden!
+*/
+
+* Generierung Erhalt Altersrente: einkrente1
+* Variable aus W1 (Senioren ab 65J.) und ab W2 (Personen ab 45 J.)
+recode PEK1410 (2=0) (1=1), gen(einkrente1)
+replace einkrente1 = PEK1400a if welle==1 
+* "Nein" bei PEK1400a umkodieren auf 0!
+replace einkrente1 = 0 if welle==1 & PEK1400a==2
+* einkrente1 labels
+label variable einkrente1 "Erh. Altersrente (gesetz.)"
+label define einkrente_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "nein" 1 "ja" 
+label value einkrente1 einkrente_lab
+
+* Ueberpruefung
+tab einkrente1 PEK1410, m
+tab einkrente1 PEK1400a, m
+
+/*
+. tab einkrente1, m
+
+             Erh. Altersrente (gesetz.) |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |     16,955       17.94       17.94 ---> aus W1 haben keinen Seniorenfb erhalten (<65 J.)
+             trifft nicht zu wg. Filter |     55,790       59.05       76.99 ---> 55769 aus W2-W6: 10 (PEK1400==-2), 11 (PEK1400==-1), 22,901 (PEK1400==2)
+																				32868 (alter<45J.)
+                            Weiss nicht |          4        0.00       76.99
+                                   nein |      2,259        2.39       79.39
+                                     ja |      2,355        2.49       81.88
+                                      . |     17,123       18.12      100.00 ---> siehe unten!
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+
+17123 Missings
+--->  Entweder Kursfragebogen (W1)
+---> oder Ausfall auf P-Eben (W1-6)
+----> 5 Faelle: HH n. befr./ZP kein Mitgl. eines BefrHH , hier liegen ganz viele Missings vor!
+. list  if einkrente==. & pnettok==1
+. tab  pnettok welle if einkrente1==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Real. Interv. auf P-E |         0          1          1          1          2          0 |         5 
+Kurzfragbogen auf P-E |     1,483          0          0          0          0          0 |     1,483 
+Ausfall auf P-Ebene,  |     2,934      2,658      3,420      1,892      2,602      2,129 |    15,635 
+----------------------+------------------------------------------------------------------+----------
+                Total |     4,417      2,659      3,421      1,893      2,604      2,129 |    17,123 
+
+*/
+
+* Generierung Erhalt Altersrente: einkrente2- mit Umkodierung bei -3
+gen einkrente2 = einkrente1
+* Angabe "Nein", dass bei vorgeschalteter Frage danach, ob ueberhaupt Gelder einer gesetzlichen Rentenversicherung erhalten werden - beudetet keine Rente anstatt -3 wg. Filter 
+replace einkrente2=0 if PEK1400==2 & PEK1410==-3
+* Alle Befragten unter 45 wurden gar nicht danach befragt; anstatt -3, nun die Angabe "keine Rente", wenn wir davon ausgehen, dass dann auch keine REnte bezogen wird.
+replace einkrente2=0 if alter<45 & alter>=16 & welle>1 & welle<7
+* Alle, die die Frage nach einer gesetzlichen Rentenversicherung (PEK1400) affirmiert haben, aber aufgrund des Altersfilter die Frage nach dem Bezug einer Altersrente (PEK1410)
+* nicht gestellt bekommen haben, werden auf -3 gesetzt und nicht auf 0 "keine Rente".(N=740)
+replace einkrente2=-3 if PEK1400==1 & PEK1410==-3 & welle>=2 & welle<=6 & alter>44 & alter<105
+* ebenso alle, die auf die Frage mit WN (-1) oder keine Angabe (-2) geantwortet haben
+replace einkrente2=-3 if PEK1400==-1 & PEK1410==-3 & welle>=2 & welle<=6 & alter>44 & alter<105
+replace einkrente2=-3 if PEK1400==-2 & PEK1410==-3 & welle>=2 & welle<=6 & alter>44 & alter<105
+* alle aus Welle 1, die angaben keine Gelder einer gesetzlichen Rentenversicherung erhalten, also auch W1
+replace einkrente2=0 if PEK1400==2 
+* alle aus Welle 1, die juenger als 45J. sind (in Analogie zu W2-W6)
+replace einkrente2=0 if welle==1 & alter<45 & alter>=16
+
+* einkrente2 labels
+label variable einkrente2 "Erh. Altersrente-, bzw. Pension (gesetz.) - mit Umkodierung"
+label value einkrente2 einkrente_lab
+
+*ueberpruefen
+tab einkrente2, m
+
+/*
+. tab einkrente2, m
+
+ einkrente2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+        -10 |        833        0.88        0.88---> Welle 1, 45- 65Jaehrige mit Personenfragebogen (15 - unter 65 J.) 
+         -3 |         21        0.02        0.90---> alle 45-65jaehrigen Personen mit -1/-2 auf PEK1400 und PEK1410==-3
+         -1 |          4        0.00        0.91
+          0 |     85,289       90.27       91.17---> 2243 mit PEK1410==2, (welle2)
+												---> 16 Faelle mit PEK1400a==2 (welle1)
+												 ---> 54,428 Faelle mit alter<45 (alle wellen)
+												 ---> 28,602 45-65jaehrige mit PEK1400==2 (alle wellen)
+          1 |      2,355        2.49       93.67---> 154 Faelle aus W1 und der REst aus W2-W6
+          . |      5,984        6.33      100.00
+------------+-----------------------------------
+      Total |     94,486      100.00
+
+5984 Missings
+. tab  pnettok welle if einkrente2==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Kurzfragbogen auf P-E |       508          0          0          0          0          0 |       508 
+Ausfall auf P-Ebene,  |     1,058        961      1,083        647        945        782 |     5,476 
+----------------------+------------------------------------------------------------------+----------
+                Total |     1,566        961      1,083        647        945        782 |     5,984 
+
+*/
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkrente1 einkrente2 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+
+*
+/* Hoehe d. Altersrente - derzeit nicht notwendig!
+
+PEK1415         int    %42.0g      metric     Hoehe der Altersrente
+---> erst ab Welle 2!!
+---> Filter: Befragte ab 45Jahren mit Altersrente: PEK1400==1 (Erhalt von GEldern der gesetzlichen Rentenversicherung), palter>44 & PEK1415==1
+tab palter PEK1410 if PEK1400==1
+--->Frage: "Und wie hoch ist der Betrag, den Sie pro Monat erhalten? Sofern Sie Steuern oder Beiträge für die gesetzliche Kranken- und Pflegeversicherung zahlen 
+müssen, ziehen Sie diese bitte ab"
+
+* Hoehe Altersrente
+gen einkrentehoehe=PEK1415 
+* HOehe = 0, wenn keien Altersrente bezogen wird
+replace einkrentehoehe=0 if einkrente==0
+
+* einkrentehoehe labels
+label variable einkrentehoehe "Hoehe Altersrente (gesetz.), ab W2"
+label define einkrentehoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "keine Rente" 
+label value einkrentehoehe einkrentehoehe_lab
+
+* Ueberpruefung
+tab einkrentehoehe, m
+*tab einkrentehoehe PEK1415
+tab einkrentehoehe einkrente
+tab einkrentehoehe PEK1400
+* list pnr welle PEK1400 PEK1410 einkrente alter
+* alles ok!
+*/
+
+* Erhalt  Witwen-  oder  Erziehungsrente (GVK)
+/*
+PEK1400b        byte   %42.0g      PEK1400b_lb    Gesetzliche Witwenrente oder Witwenpension (nur Seniorenbogen; nur Welle 1)
+---> Filter: keiner
+--->  Nur an Personen, die mind. 65 Jahre alt (Seniorenfragebogen) sind. In unserem Sample sind nur Menschen bis 65Jahren, d.h. nur fuer diese koennten
+wir angeben, ob Witwenrente bezogen wird. 
+---> Es wird nicht nach Erziehungsrente gefragt. Deshalb ist diese Frage nicht ganz kompatibel mit der Folgefrage ab W2 (PEK1420)
+--->Frage: "Und jetzt kommen wir kurz zum Thema Rentenzahlungen. Erhalten Sie eine der folgenden Leistung der gesetzlichen Rentenversicherung oder eine entsprechende staatliche Pension? 
+Wenn Sie mehrere dieser Leistungen erhalten, nennen Sie bitte alle.  
+B  Eine gesetzliche Witwenrente oder eine Witwenpension  
+---> Im Seniorenfb scheint es eine Anschlussfrage nach der Hoehe des Waisen bzw. der gesetzlichen ALtersrente zu geben, aber da ich finde weder im Datensatz
+eine, noch kann ich diese ausfindig machen, da mir dazu der VAriablenname fehlt (in FB nicht notiert!)
+
+
+PEK1420         byte   %42.0g      janein     Indikator: Erhalt Witwen- oder Erziehungsrente?
+---> erst ab Welle 2!!
+---> Filter: Verwitwete (PD0500==3) Rentenempfänger (PEK1400==1); verwitet koennen (dem Filter zufolge) erst Befragte ab 16 ohne Ehepartner 
+oder eingetr. gleichgeschlechtlichen Lebenspartner im HH sein (ALTER >= 16 & EPARTNER = 0) 
++ (nicht im FB notiert): alle Senioren (Seniorenfb) egal welcher Familienstand mit PEK1400==1
+tab PD0500 PEK1420
+tab epartner PEK1420
+---> Nur die Frage PEK1400 ist wirklich durchgaengig als Filter eingebaut!
+----> Frage: "Eine  Witwen-  oder  Erziehungsrente  der  gesetzlichen  Rentenversicherung  oder  Witwengeld der Beamtenversorgung?"
+
+
+Filter ueberpruefen:
+W1: nur Personen ab 65 J, d.h. mit Seniorenfb!
+tab PEK1400b if welle==1 & fb_vers==3
+* 170 Faelle
+tab PEK1400b if welle==1 & fb_vers!=3
+*16955 Faelle mit "in Fragebogenversion nicht erhoben"
+
+W2- W6:
+*verwitwete Rentenempfaenger
+tab PEK1420 if welle>1 & PD0500==3  & PEK1400==1
+--->1024 Faelle haben Ja/Nein geantwortet
+
+*nicht-verwitwete Rentenempfaenger
+tab PEK1420 if welle>1 & PD0500!=3  & PEK1400==1 
+---> 3602 Faelle auf PEK1420==-3
+---> aber auch 551 Faelle, die nicht verwitwet sind, habe die Frage gestellt bekommen
+---> 551 haben den Seniorenfb erhalten (alle 65 Jahre alt), ab W2
+---> Senioren haben die Frage auch abseits ihres Familienstandes gestellt bekommen!
+tab PEK1420 if PEK1400==1 & fb_vers==3 & welle>1
+tab fb_vers if PEK1420>=-2 & PEK1420<9999 & alter==65 & welle>1 & PD0500!=3
+
+*keine Rentenempfaenger oder keine gueltige Antort auf PEK1400(GVK)
+tab PEK1420 if welle>1 & PEK1400!=1  
+---> 55,050 Faelle auf -3 (N=55025) bzw. -4 (N=25) - PEK1420
+
+*/
+
+* Generierung Witwen bzw. Erziehungsrente: einkwitwe1
+* Variable aus W1 (Senioren ab 65J.) und ab W2 (alle Senioren + verwitwete Personen unter 65J.)
+recode PEK1420 (2=0) (1=1), gen(einkwitwe1)
+replace einkwitwe1 = PEK1400b if welle==1 
+* "Nein" bei PEK1400b umkodieren auf 0!
+replace einkwitwe1 = 0 if welle==1 & PEK1400b==2
+
+* einkwitwe1 labels
+label variable einkwitwe1 "Erh. Witwen/Erzieh.rente - ohne Umkodierung"
+label define einkwitwe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "ja" 
+label value einkwitwe1 einkwitwe_lab
+
+* ueberpruefen
+tab einkwitwe1, m
+tab einkwitwe1 PEK1420, m
+tab einkwitwe1 PEK1400b, m
+
+
+/*
+. tab einkwitwe1, m
+
+               Erh. Witwen/Erzieh.rente |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |     16,955       17.94       17.94  ---> W1 Personen unter 65J. mit Personenfragebogen (15 - unter 65 J.)
+       Frage irrtuemlich nicht gestellt |         36        0.04       17.98  ---> W2-W6: Personen mit PD0500==-4 bzw. Missing auf famstand
+             trifft nicht zu wg. Filter |     58,627       62.05       80.03  ---> W2-W6: 3602 Faelle nicht-verwitwete Rentenempfaenger +
+																					     55025 Faelle: keine Rentenempfaenger o. keine gueltige Antort auf PEK1400
+                           keine Angabe |          1        0.00       80.03 ---> gueltige ANtw: 170 Senioren der W1 mit Rentenbezuegen (PEK1400==ja, fb_vers==3 & welle==1) 
+																			      + 1024 unter 65jaehrige, verwitwete Personen (PD0500==3) von W2-W6
+																				  + 551 Senioren mit Rentenbezuegen (PEK1400==ja) von W2-W6
+                                   Nein |        746        0.79       80.82
+                                     ja |        998        1.06       81.88
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+. tab  pnettok welle if einkwitwe1==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Real. Interv. auf P-E |         0          1          1          1          2          0 |         5 
+Kurzfragbogen auf P-E |     1,483          0          0          0          0          0 |     1,483 
+Ausfall auf P-Ebene,  |     2,934      2,658      3,420      1,892      2,602      2,129 |    15,635 
+----------------------+------------------------------------------------------------------+----------
+                Total |     4,417      2,659      3,421      1,893      2,604      2,129 |    17,123 
+
+5 Personen:	HH n. befr./ZP kein Mitgl. eines BefrHH
+
+*/
+
+* Generierung einkwitwe2: mit Umkodierung 
+gen einkwitwe2 = einkwitwe1
+
+* fuer alle Wellen: (also auch W1) werden alle nicht-verwitweten Personen unter 65J. von -3 (W2-W6) bzw. -10 (W1) auf 0 gesetzt
+replace einkwitwe2 = 0 if einkwitwe1==-10 & PD0500!=3
+replace einkwitwe2 = 0 if einkwitwe1==-3 & PD0500!=3
+
+* fuer alle Wellen: (also auch W1) werden alle ohne Rentenbezuege allemeiner Art (PEK1400==Nein) auf 0 gesetzt.
+replace einkwitwe2 = 0 if PEK1400==2
+
+* einkwitwe2 labels
+label variable einkwitwe2 "Erh. Witwen/Erzieh.rente - mi Umkodierung"
+label value einkwitwe2 einkwitwe_lab
+
+* Ueberpruefung!!
+tab einkwitwe2, m
+
+/*
+. tab einkwitwe2, m
+
+          Erh. Witwen/Erzieh.rente - mi |
+                            Umkodierung |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |        204        0.22        0.22 --> Welle 1, verwitwet
+       Frage irrtuemlich nicht gestellt |         11        0.01        0.23 --> PD0500 wurde irrt. nicht gestellt
+             trifft nicht zu wg. Filter |          1        0.00        0.23 ---> verwitwete Person mit PEK1400==-2
+                           keine Angabe |          1        0.00        0.23 ---> Senior_in, mit Rentenbezug, aber keine Angabe bei PEK1420
+                                   Nein |     76,148       80.59       80.82 ---> 746 Faelle mit einkwitwe1==2
+																			 ---> 5093 Faelle nicht-verwitwete Rentenempfaenger 
+																			 ---> 70806 Faelle: keine Rentenempfaenger (PEK1400==2)
+																			 
+																			 
+                                     ja |        998        1.06       81.88
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+*/
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkwitwe1 einkwitwe2 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/* zur Zeit nicht wichtig!
+PEK1425         int    %42.0g      metric     Hoehe Witwen- oder Erziehungsrente (Netto)
+---> erst ab Welle 2!!
+---> Filter: Erhalt Witwen- oder Erziehungsrente (PEK1420==1) von verwitweten (PD0500==3) Rentenempfänger (PEK1400==1)
+----> Frage: "Und wie hoch ist der Betrag, den Sie pro Monat erhalten? Sofern Sie Steuern oder Beiträge 
+für die gesetzliche Kranken- und Pflegeversicherung zahlen müssen, ziehen Sie diese bitte ab"
+
+* Generierung Hoehe Witwen bzw. Erziehungsrente
+* in W1 gibt es selbst im Seniorenfb dazu keine von mir gefundene Variable
+gen einkwitwehoehe=PEK1425
+* Wenn kein Erhalt, dann keine Hoehe!
+replace einkwitwehoehe=0 if einkwitwe==0
+
+* einkwitwehoehe labels
+label variable einkwitwehoehe "Hoehe Witwen/Erzieh.rente, ab W2"
+label define einkwitwehoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "keine Rente" 
+label value einkwitwehoehe einkwitwehoehe_lab
+
+* Ueberpruefen!
+tab einkwitwehoehe einkwitwe
+tab einkwitwehoehe, m
+*---> abermals diese 17123 Missings
+*tab einkwitwehoehe PEK1420
+
+* 1 Fall: einkwitwehoehe==0 & einkwitwe==1
+* list pnr hnr sex alter welle PEK1400 PEK1420 PEK1425 if einkwitwehoehe==0 & einkwitwe==1
+* ---> was sollen wir mit dem machen?! umkodieren auf einkwitwe==0?
+*list sex alter welle PEK1400 PEK1420 PEK1425 einkwitwehoehe einkwitwe PD0500 epartner 
+* da alle mit PEK1400==2 auf "keine Rente" (einkwitwe) sind, schaue ich mir diejenigen an, die PEK1400!=2 sind:
+*list sex alter welle PEK1400 PEK1420 PEK1425 PEK1400b einkwitwehoehe einkwitwe PD0500 epartner if PEK1400!=2
+*/
+
+
+/*PEK1430         byte   %42.0g      janein     Indikator: Erhalt Waisenrente?
+---> erst ab Welle 2!!
+---> Filter:  Rentenempfänger unter 27 Jahre; Alter <= 27 &  PEK1400==1 (PEK1400:Frage nach REntenzahlungen "Erhalten Sie eine Leistung der gesetzlichen Rentenversicherung, wie z.B. Alters-, Witwen-, 
+Waisen- oder Erwerbsunfähigkeitsrente oder eine entsprechende staatliche Pension?)
+----> Frage: "Eine Waisenrente der gesetzlichen Rentenversicherung oder Waisengeld?"
+
+Filter ueberpruefen:
+* Befragte>27 Jahren
+tab PEK1430 if alter>27 & welle>1
+---> sind alle auf PEK1430==-3 bzw. -10 - ok!
+---> N=667 auf PEK1430==-10
+---> N=47397 auf PEK1430==--3
+
+* Befragte<=27 Jahren mit Rentenbezuegen (PEK1400==1)
+tab PEK1430 if alter<=27 & welle>1 & PEK1400==1
+---> 309 Faelle haben Frage beantwortet! - ok!
+---> N=309
+
+* Befragte<=27 Jahren OHNE Rentenbezuege (PEK1400==2)
+tab PEK1430 if alter<=27 & welle>1 & PEK1400==2
+---> alle auf PEK1430==-3 - ok!
+---> N=11802
+
+* Befragte<=27 Jahren, unklare Antwort bei PEK1400
+tab PEK1430 if alter<=27 & welle>1 & (PEK1400==-1 | PEK1400==-2)
+---> alle auf PEK1430==-3 - ok!
+---> N=63
+
+*/
+* Generierung Waisenrente, einkwaise1
+recode PEK1430 (2=0) (1=1), gen(einkwaise1)
+
+* einkwaise1 labels
+label variable einkwaise1 "Erh. Waisenrente, ab W2 - ohne Umkodierung"
+label define einkwaise_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "ja" 
+label value einkwaise1 einkwaise_lab 
+
+* Ueberpruefen
+tab einkwaise1, m
+
+/*
+. tab einkwaise1, m
+
+         Erh. Waisenrente, ab W2 - ohne |
+                            Umkodierung |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |        667        0.71        0.71 ---> Senioren ab W2 mit Seniorenfb! (Filter, da > 27J)
+            Item in Welle nicht erhoben |     17,125       18.12       18.83 ---> Befragte der Welle1
+             trifft nicht zu wg. Filter |     59,262       62.72       81.55 ---> 47,397 Befragte ab W2, ueber 27 Jahre ohne Seniorenfb!
+																	           	  11,802 Befragte ab W2 27Jahre und juenger, ohne Rentenbezuege
+																				      63 Befragte ab W2 27Jahre und juenger, unklare Antwort zu Rentenbezuege
+                           keine Angabe |          1        0.00       81.55 
+                                   Nein |         56        0.06       81.61
+                                     ja |        252        0.27       81.88 ---> insg. Befragte<=27 Jahren mit Rentenbezuegen (PEK1400==1)
+
+                                      . |     17,123       18.12      100.00 ----> Befragte (aller Wellen) mit PEK1430==.
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+tab  pnettok welle if einkwaise1==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Real. Interv. auf P-E |         0          1          1          1          2          0 |         5 
+Kurzfragbogen auf P-E |     1,483          0          0          0          0          0 |     1,483 
+Ausfall auf P-Ebene,  |     2,934      2,658      3,420      1,892      2,602      2,129 |    15,635 
+----------------------+------------------------------------------------------------------+----------
+                Total |     4,417      2,659      3,421      1,893      2,604      2,129 |    17,123 							  
+								  
+*/
+
+*Generierung einkwaise 2 - mit Umkodierung!
+gen einkwaise2 = einkwaise1
+* alle Befragten ab W2 auf die der Erhalt einer Waisenrente nicht zutreffen kann, werden auf 0 gesetzt!
+* keine Waisenrente, wenn keine Waisen- oder Erwerbsunf.rente bezogen wird (Filtervariable PEK1400)
+replace einkwaise2=0 if PEK1400==2 & welle>1
+* Bei der Waisenrente gilt die Höchstaltersgrenze von 27 Jahren bei Kindern in Ausbildung oder körperlich oder geistig behinderten Kindern,
+* daher beziehen alle Menschen über 27 Jahren keine Waisenrente, gilt ja fuer alle (Wellen).
+replace einkwaise2=0 if alter>27 & alter<66 & welle>1
+
+* einkwaise2 labels
+label variable einkwaise2 "Erh. Waisenrente, ab W2 - mit Umkodierung"
+label value einkwaise2 einkwaise_lab 
+
+* ueberpruefen:
+tab einkwaise2, m 
+
+/*
+. tab einkwaise2, m 
+
+          Erh. Waisenrente, ab W2 - mit |
+                            Umkodierung |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+            Item in Welle nicht erhoben |     17,125       18.12       18.12 ---> Befragte der Welle1
+             trifft nicht zu wg. Filter |         63        0.07       18.19 ---> Befragte ab W2 27Jahre und juenger, unklare Antwort zu Rentenbezuege
+                           keine Angabe |          1        0.00       18.19 ---> Befragte <=27 Jahren mit Rentenbezuegen (PEK1400==1)
+                                   Nein |     68,023       71.99       90.18 --->    56 Befragte<=27 Jahren mit Rentenbezuegen (PEK1400==1)& Nein-ANtwort bei PEK1430==2
+								                                             ---> 47397 Befragte ab W2, ueber 27 Jahre ohne Seniorenfb & PEK1430==-3!
+																			 --->  8101 Befragte ab W2, ueber 27 Jahre ohne Seniorenfb & PEK1430==.
+																			 ---> 11802 Befragte ab W2 27Jahre und juenger, ohne Rentenbezuege
+																			 --->   667 Senioren ab W2 mit Seniorenfb! (Filter, da > 27J)
+																			 
+                                     ja |        252        0.27       90.45 ---> Befragte<=27 Jahren mit Rentenbezuegen (PEK1400==1)
+                                      . |      9,022        9.55      100.00 ---> 4605 Befragte ab W2, unter(!) 28 Jahre & PEK1430==.
+																			 ---> 4417 Befragte der Welle 1 (egal welchen Alters) mit PEK1430==.
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkwaise1 einkwaise2 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/* noch nicht von Belang
+*PEK1435         int    %42.0g      metric     Hoehe Waisenrente (Netto)
+---> erst ab Welle 2!!
+---> Filter: Erhalt von Waisenrente (PEK1430==1)  
+---> Frage: "Und wie hoch ist der monatliche Geldbetrag, den Sie da normalerweise erhalten? Sofern Sie 
+Steuern  oder  Beiträge  für  die  gesetzliche  Kranken-  und  Pflegeversicherung  zahlen  müssen, 
+ziehen Sie diese bitte ab"
+
+* Hoehe Waisenrente
+gen einkwaisehoehe=PEK1435
+* wer keine Waisenrente bezieht, wird auf 0 gesetzt, anstatt auf -3 
+replace einkwaisehoehe=0 if einkwaise==0
+
+* einkwaisehoehe labels
+label variable einkwaisehoehe "Hoehe Waisenrente, ab W2"
+label define einkwaisehoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "keine Waisenrente"  
+label value einkwaisehoehe einkwaisehoehe_lab
+
+* Ueberpruefen mit list und tab!
+tab einkwaisehoehe einkwaise
+* list alter PEK1435 PEK1430 PEK1400 einkwaisehoehe einkwaise
+*/
+
+/*PEK1440         byte   %42.0g      janein     Indikator: Erhalt Erwerbsminderungsrente?
+---> erst ab Welle 2 erhoben!
+---> Filter: Alle Rentenempfänger (PEK1400==1)
+---> Frage: "Eine  gesetzliche  Rente  oder  eine  Beamtenpension  wegen  voller  oder  teilweiser 
+Erwerbsminderung?" 
+
+Filter ueberpruefen:
+* Befragte der Welle1
+tab PEK1440 if welle==1
+---> 17125 Faelle auf PEK1440==-9
+
+* zusaetzlicher Filter: Senioren mit Seniorenfb!
+tab PEK1440 if welle>1 & fb_vers==3
+---> 667 Faelle mit PEK1440==-10
+
+* Befragte mit Rentenbezuege (ohne Seniorenfb) ab Welle 2
+tab PEK1440 if PEK1400==1 & welle>1 & fb_vers!=3
+---> 4573 Faelle auf PEK1440 (-2/2)
+
+* Befragte OHNE Rentenbezuege (ohne Seniorenfb) ab Welle 2
+tab PEK1440 if PEK1400==2 & welle>1 & fb_vers!=3
+---> 54,889 Faelle mit PEK1440==-3
+
+* Befragte mit UNKLAREN Rentenbezuegen (ohne Seniorenfb) ab Welle 2
+tab PEK1440 if welle>1 & fb_vers!=3 & (PEK1400==-1 | PEK1400==-2)
+---> 109 Faelle mit PEK1440==-3
+
+*/
+* Generierung Erhalt Erwerbsminderungsrente: einkminder1
+recode PEK1440 (2=0) (1=1), gen(einkminder1)
+
+* einkminder1 labels
+label variable einkminder1 "Erh. Erwerbsmind.Rente, ab W2 - ohne Umkodierung"
+label define einkminder_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "ja" 
+label value einkminder1 einkminder_lab 
+
+* ueberpruefen:
+tab einkminder1, m
+
+/*
+ tab einkminder1, m
+
+   Erh. Erwerbsmind.Rente, ab W2 - ohne |
+                            Umkodierung |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |        667        0.71        0.71 ---> Befragte ab W2 mit Seniorenfb
+            Item in Welle nicht erhoben |     17,125       18.12       18.83 ---> Befragte der Welle1 
+             trifft nicht zu wg. Filter |     54,998       58.21       77.04 ---> 54889 Befragte ab W2 ohne Rentenbezuege
+																			 --->   109 Befragte mit unklaren REntenbezuegen
+                           keine Angabe |          3        0.00       77.04
+                            Weiss nicht |         11        0.01       77.05
+                                   Nein |      2,760        2.92       79.97
+                                     ja |      1,799        1.90       81.88 ---> Befragte mit Rentenbezuege (ohne Seniorenfb) ab Welle 2
+                                      . |     17,123       18.12      100.00 ---> Befragte aller Wellen mit PEK1440==.
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+tab  pnettok welle if einkminder1==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Real. Interv. auf P-E |         0          1          1          1          2          0 |         5 
+Kurzfragbogen auf P-E |     1,483          0          0          0          0          0 |     1,483 
+Ausfall auf P-Ebene,  |     2,934      2,658      3,420      1,892      2,602      2,129 |    15,635 
+----------------------+------------------------------------------------------------------+----------
+                Total |     4,417      2,659      3,421      1,893      2,604      2,129 |    17,123 
+
+*/
+
+* Generierung Erhalt Erwerbsminderungsrente: einkminder2
+* wer keine Rente bezieht, bezieht auch k. Erwerbsmindertenrente
+gen einkminder2 = einkminder1
+replace einkminder2=0 if PEK1400==2 & welle>1
+
+* einkminder2 labels
+label variable einkminder2 "Erh. Erwerbsmind.Rente, ab W2 - mit Umkodierung"
+label value einkminder2 einkminder_lab 
+
+* Ueberpruefen!!
+tab einkminder2, m
+/*
+
+    Erh. Erwerbsmind.Rente, ab W2 - mit |
+                            Umkodierung |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+Item in Fragebogenversion nicht erhoben |        616        0.65        0.65  ---> Befragte ab W2 mit Seniorenfb und Rentenbezuegen (PEK1400!=2)
+																				 tab einkminder2 if fb_vers==3 & welle>1 & PEK1400!=2
+            Item in Welle nicht erhoben |     17,125       18.12       18.78 ---> Befragte der Welle1 
+             trifft nicht zu wg. Filter |        109        0.12       18.89 --->   109 Befragte ohne Seniorenfb mit unklaren REntenbezuegen
+                           keine Angabe |          3        0.00       18.89 ---> 3 Befragte mit Rentenbezuege (ohne Seniorenfb) ab Welle 2
+                            Weiss nicht |         11        0.01       18.91 ---> 11 Befragte mit Rentenbezuege (ohne Seniorenfb) ab Welle 2
+                                   Nein |     57,700       61.07       79.97 --->  2760 Befragte mit Rentenbezuege (ohne Seniorenfb) ab Welle 2
+																			 ---> 54889 Befragte OHNE Rentenbezuege (ohne Seniorenfb) ab Welle 2
+																			 --->    51 Senioren OHNE Rentenbezuege ab Welle 2
+																			     tab einkminder2 if fb_vers==3 & welle>1 & PEK1400==2
+                                     ja |      1,799        1.90       81.88 ---> 1799 Befragte mit Rentenbezuege (ohne Seniorenfb) ab Welle 2
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+*/
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkminder1 einkminder2 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/* noch nicht relevant!
+PEK1445         int    %42.0g      metric     Hoehe Erwerbsminderungsrente (Netto)
+---> erst ab Welle 2 erhoben!
+---> Filter: Erhalt Erwerbsminderungsrente (PEK1440==1)
+---> Frage: "Und wie hoch ist der monatliche Geldbetrag, den Sie da normalerweise erhalten? Sofern Sie 
+Steuern  oder  Beiträge  für  die  gesetzliche  Kranken-  und  Pflegeversicherung  zahlen  müssen, 
+ziehen Sie diese bitte ab"
+
+* Hoehe Erwerbsminderungsrente
+gen einkminderhoehe = PEK1445
+* Wer keine Rente erhaelt
+replace einkminderhoehe=0 if einkminder==0
+
+* einkminderhoehe labels
+label variable einkminderhoehe "Hoehe. Erwerbsmind.Rente, ab W2"
+label define einkminderhoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "keine E-Rente" 
+label value einkminderhoehe einkminderhoehe_lab 
+
+* Ueberpruefen
+tab einkminderhoehe einkminder
+tab einkminderhoehe PEK1440
+tab einkminderhoehe PEK1400
+* list alter welle einkminderhoehe einkminder PEK1440 PEK1400 PEK1445
+* list alter welle einkminderhoehe einkminder PEK1440 PEK1400 PEK1445 if PEK1400!=2
+* alles ok!
+*/
+
+/*PEK1450         byte   %42.0g      janein     Indikator: Erhalt private Rente/Betriebsrente?
+---> erst ab Welle 2 erhoben!
+---> Filter: Alle Befragten- kein Filter
+---> Frage: "Neben  staatlichen  Renten  oder  Pensionen  gibt  es  ja  auch  noch  private  Renten  oder 
+Betriebsrenten.  Erhalten  Sie  monatliche  Leistungen  von  einer  oder  mehreren  privaten  oder 
+betrieblichen Rentenversicherungen?" 
+
+Filter?
+tab PEK1450, m
+--> kein Filter!
+
+*/
+* Generierung private Rente / Betriebsrente: einkprente1
+recode PEK1450 (2=0) (1=1), gen(einkprente1)
+
+* einkprente1 labels
+label variable einkprente1 "Erh. private Rente /Betriebsrente, ab W2"
+label define einkprente_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1 "ja" 
+label value einkprente1 einkprente_lab
+
+* Ueberpruefen
+tab einkprente1, m
+tab einkprente1 PEK1450,m
+/*
+. tab einkprente1, m
+
+  Erh. private Rente /Betriebsrente, ab |
+                                     W2 |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+            Item in Welle nicht erhoben |     17,125       18.12       18.12 ---> Befragte der Welle 1 
+                           keine Angabe |         33        0.03       18.16...
+                            Weiss nicht |         52        0.06       18.21...
+                                   Nein |     59,070       62.52       80.73...
+                                     ja |      1,083        1.15       81.88... ---> Befragte ab Welle 2
+                                      . |     17,123       18.12      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+ 
+ tab  pnettok welle if einkprente1==.
+
+ Befragungsstatus der |                               welle
+   Person (1-Steller) | 1. 2006/2  2. 2007/2  3. 2008/2    4. 2010    5. 2011    6. 2012 |     Total
+----------------------+------------------------------------------------------------------+----------
+Real. Interv. auf P-E |         0          1          1          1          2          0 |         5 
+Kurzfragbogen auf P-E |     1,483          0          0          0          0          0 |     1,483 
+Ausfall auf P-Ebene,  |     2,934      2,658      3,420      1,892      2,602      2,129 |    15,635 
+----------------------+------------------------------------------------------------------+----------
+                Total |     4,417      2,659      3,421      1,893      2,604      2,129 |    17,123 
+								  
+*/
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkprente1 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/*PEK1455         int    %42.0g      metric     Hoehe private Rente/Betriebsrente (Netto)
+---> erst ab Welle 2 erhoben!
+---> Filter: Alle, die eine private (Betriebs-)Rente erhalten (PEK1450==1)
+---> Frage:"Und  wie  hoch  sind  diese  Leistungen  insgesamt  pro  Monat?  Wenn  Sie  mehrere  Leistungen 
+erhalten, zählen Sie bitte alle zusammen."
+*/
+
+/* vorerst nicht relevant
+* Generierung Hoehe der private Rente / Betriebsrente
+gen einkprentehoehe=PEK1455
+replace einkprentehoehe=0 if einkprente==0
+
+* einkprentehoehe labels
+label variable einkprentehoehe "Hoehe private Rente /Betriebsrente, ab W2"
+label define einkprentehoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "keine Rente" 
+label value einkprentehoehe einkprentehoehe_lab
+
+* Ueberpruefen
+*tab einkprentehoehe PEK1455
+tab einkprentehoehe PEK1450
+tab einkprentehoehe  einkprente
+* list PEK1450 PEK1455  einkprente einkprentehoehe
+*/
+
+/* HEK0100         byte   %42.0g    janein        Indikator: Erhalt Sozialhilfe bzw. Grundsicherung im Alter?
+---> Filter: keiner!
+---> Frage: "Ausser Arbeitslosengeld 2 kann man ja auch noch andere oeffentliche Zahlungen erhalten.
+Erhalten Sie oder jemand in Ihrem Haushalt derzeit Grundsicherung im Alter oder bei Erwerbsminderung, oder
+eine andere Leistung der Sozialhilfe? Bitte nennen Sie hier keine Rentenzahlungen."
+---> Wir koennen nicht herausfinden, fuer welche Person im HH diese Leistungen bezogen werden!
+
+Filter?
+tab HEK0100 welle, m
+--> kein FIlter
+*/
+* Generierung HH bezieht Sozialhilfe/ Grunsicherung im Alter: einksozial1
+recode HEK0100 (2=0) (1=1), gen(einksozial1)
+
+* einksozial1 labels
+label variable einksozial1 "Erh. Sozialh./Grundsi.im Alter"
+label define einksozial_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1"Ja" 
+label value einksozial1 einksozial_lab
+
+* Ueberpruefung
+tab HEK0100 einksozial1, m
+tab einksozial1, m
+/*
+. tab einksozial1, m
+
+         Erh. Sozialh./Grundsi.im Alter |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                           keine Angabe |         38        0.04        0.04
+                            Weiss nicht |        185        0.20        0.24
+                                   Nein |     90,136       95.40       95.63
+                                     Ja |      4,127        4.37      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einksozial1 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+
+/*HEK0110         int    %42.0g    HEK4stell_lb  Sozialh. bzw. Grunds. im Alter: Hoehe des mon. Betrags
+---> Hoehe erst ab WElle 2 erhoben!
+---> Filter: Vefragte, deren HH Grundsicherung im Alter bzw. Sozialhilfe bezieht (HEK0100==1)
+---> Frage: "Wie hoch ist der Betrag, den Sie da insgesamt pro Monat erhalten? Falls Ihr Haushalt
+mehrerer solcher Zahlungen pro Monat erhält, rechnen Sie bitte alle Beträge zusammen."
+---> Wir koennen nicht herausfinden, fuer welche Person im HH diese Leistungen bezogen werden!
+
+* Generierung:Hoehe der Sozialhilfe/ Grunsicherung im Alter eines HH
+gen einksozialhoehe=HEK0110
+replace einksozialhoehe=0 if einksozial==0
+
+* einksozialhoehe labels
+label variable einksozialhoehe "Hoehe Sozialh./Grundsi.im Alter"
+label define einksozialhoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Erhalt des HH" 
+label value einksozialhoehe einksozialhoehe_lab
+
+* Ueberpruefung
+*tab HEK0110 einksozialhoehe, m
+ tab einksozialhoehe einksozial
+ tab einksozialhoehe HEK0100
+* list welle einksozialhoehe einksozial HEK0100 HEK0110 
+*/
+
+/*
+i) Wohngeld - auf HH-Ebene
+HW1800          byte   %42.0g      janein     Indikator: Erhalt Wohngeld?
+---> Frage: "Erhalten Sie Wohngeld als (Lastenzuschuss)?"
+---> Filter (ab W4): alle Haushalte, ausser in Wohnheimen Wohnende (HW0200==2) ohne Angaben zu Wohnkosten (HW1100==99999)
+----> Filter in FB-W1-3: alle HH außer wenn KA in (HW1100==99999) und außer mietfrei Wohnende (HW0300==4)
+in W1 sind alle mitfrei Wohnende (HW0300==4)auf HW1800==-3 
+in W2 und W3 sind nur einige der mietfrei Wohnenden (HW0300==4) auf HW1800==-3
+--> Der Filter stimmt hier einfach nicht mit der Doku ueberein, denn es gibt Personen, die weder in Wgs noch in Wohnheimen wohnen (HW0200==3) und mietfrei wohnen (WH0300==4)
+und dennoch die Frage HW1800 gestellt bekommen haben (HW1800!=-3)  
+
+W1: alle und nur die mietfrei Wohnenden (HW0300==4) auf HW1800==-3
+645 Faelle mit HW1800==-3
+
+in WOhnheimen lebende (HW0200==2) ohne ANgaben zu Wohnkosten (HW1100==-2)
+0 Faelle mit HW1800==-3
+
+W2: nur aber auch nur einige der mietfrei Wohnenden (HW0300==4) und weder in WGs noch in Wohnheimen lebenden (HW0200==3) auf HW1800==-3
+--> im FB werden "mietfrei Wohnende" bei Frage HW1300 (Sontige Wohnkosten von Mietern) auf Frage HW2000 weitergeleitet und somit von Frage HW1800 herausgefiltert.
+Dieser Filter wurde nicht für alle Betroffenden angewendet, weshalb einiger der mietfrei Wohnenden dennoch die Frage HW1800 gestellt bekommen haben:
+74 Faelle mit HW1800==-3
+5 Faelle mit HW1800==-1
+9 Faelle mit HW1800==1
+317 Faelle mit HW1800==2
+2 Faelle mit HW1800==-8
+
+in Wohnheimen lebende (HW0200==2) ohne ANgaben zu Wohnkosten (HW1100==-2)
+0 Faelle mit HW1800==-3
+
+W3: nur aber auch nur einige der mietfrei Wohnenden (HW0300==4) und weder in WGs noch in Wohnheimen lebenden (HW0200==3) auf HW1800==-3
++ 2 Faelle (entsprechend des FB), die in Wohnheimen leben (HW0200==2) und keine Angbe zu der Frage HW1100(==-2) (Wohnkosten)
+von den mietfrei Wohnenden:
+1 Fall auf HW1800==1
+50 Faelle von HW1800==-3
+350 Faelle auf HW1800==2
+
+in Wohnheimen lebende (HW0200==2) ohne ANgaben zu Wohnkosten (HW1100==-2)
+2 Faelle mit HW1800==-3
+
+W4 bis W6: Filter laut FB: ALle HH außer in WOhnheimen lebende (HW0200==2) ohne ANgaben zu Wohnkosten (HW1100==-2)
+---> Filter stimmt!
+W4: 1 Fall mit HW1800==-3
+mietfrei Wohnende: 432 Faelle
+
+W5: 2 Faelle mit HW1800==-3
+mietfrei Wohnende: 594 Faelle
+
+W6; 1 Fall mit HW1800==-3
+mietfrei Wohnende: 456 Faelle
+
+
+mein Vorschlag: alle Personen, die angaben mietfrei zu wohnen (HW0300==4) auf HW1800==-3 zu setzen 
+*/
+* Generierung von Erhalt von Wohngeld
+recode HW1800 (2=0) (1=1), gen(einkwohn1)
+* kein Wohngeld, wer mietfrei wohnt
+replace einkwohn1=-3 if HW0300==4
+
+* einkwohn1 labels
+label variable einkwohn1 "Erh. Wohngeld (HH) - ohne Umkodierung des Filters"
+label define einkwohn_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "Nein" 1"Ja" 
+label value einkwohn1 einkwohn_lab
+
+* Ueberpruefen!
+tab einkwohn1, m
+tab einkwohn1 HW1800, m
+tab einkwohn1 HW0300,m
+tab einkwohn1 HW0200, m
+
+/*
+tab einkwohn1, m
+
+  Erh. Wohngeld (HH) - ohne Umkodierung |
+                            des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                      unplausibler Wert |      3,150        3.33        3.33
+       Frage irrtuemlich nicht gestellt |         11        0.01        3.35
+             trifft nicht zu wg. Filter |      2,941        3.11        6.46 --> 645 Faelle aus W1, mitfrei Wohnende mit HW1800==-3
+																			 --> 74 Faelle aus W2 mit HW1800==-3
+																			 --> 333 Faelle aus W2, mietfrei Wohnende mit HW1800!=-3
+																			 --> 50 Faelle aus W3 mit HW1800==-3
+																			 --> 351 Faelle aus W3, mietfrei Wohnende mit HW1800!=-3
+																			 --> 2 Faelle aus W3 in Wohnheim wohnende ohne Angabe zu Mietkosten mit HW1800==-3
+																			 --> 1 Fall aus W4, in Wohnheim wohnende ohne Angabe zu Mietkosten mit HW1800==-3
+																			 --> 432 umkodierte Faelle aus W4, mietfrei Wohnende mit HW1800!=-3
+																			 --> 2 Faelle aus W5, in Wohnheim wohnende ohne Angabe zu Mietkosten mit HW1800==-3
+																			 --> 594 umkodierte Faelle aus W5, mietfrei Wohnende mit HW1800!=-3
+																			 --> 1 Faelle aus W6, in Wohnheim wohnende ohne Angabe zu Mietkosten mit HW1800==-3
+																			 --> 456 umkodierte Faelle aus W6, mietfrei Wohnende mit HW1800!=-3
+
+                           keine Angabe |         42        0.04        6.50
+                            Weiss nicht |        345        0.37        6.87
+                                   Nein |     83,826       88.72       95.59
+                                     Ja |      4,171        4.41      100.00
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+* list welle HW0200 HW0300 HW1800 HW1100 einkwohn
+* list welle HW0200 HW0300 HW1800 HW1100 einkwohn if HW1800==-3
+
+* Erhalt von Wohnheld: einkwohn2 (mit Umkodierung des Filters)
+gen einkwohn2=einkwohn1
+* Umkodierung aller mietfrei Wohnenden auf einkwohn2==0
+replace einkwohn2=0 if HW0300==4 & einkwohn1==-3
+* Umkodierung aller mietfrei Wohnenden mit HW1800==1 auf einkwohn2==1
+replace einkwohn2=1 if HW0300==4 & einkwohn1==-3 & HW1800==1
+
+* einkwohn2 labels
+label variable einkwohn2 "Erh. Wohngeld (HH) - mit Umkodierung des Filters"
+label value einkwohn2 einkwohn_lab
+
+* Ueberpruefung
+tab einkwohn2, m
+tab einkwohn2 einkwohn1, m
+tab einkwohn2 HW1800, m
+
+/*
+tab einkwohn2, m
+								  
+   Erh. Wohngeld (HH) - mit Umkodierung |
+                            des Filters |      Freq.     Percent        Cum.
+----------------------------------------+-----------------------------------
+                      unplausibler Wert |      3,150        3.33        3.33 --> siehe einkwohn1
+       Frage irrtuemlich nicht gestellt |         11        0.01        3.35 --> siehe einkwohn1
+             trifft nicht zu wg. Filter |          6        0.01        3.35 --> 6 Faelle, nur noch in Wohnheimen lebende mit keine Angabe Wohnkosten (W1-W6)
+                           keine Angabe |         42        0.04        3.40 --> siehe einkwohn1
+                            Weiss nicht |        345        0.37        3.76 --> siehe einkwohn1
+                                   Nein |     86,732       91.79       95.55 --> 83826 nicht- mitfrei wohnende mit Nein-Antworten (HW1800==2)
+																			 --> 645 Faelle aus W1, mietfrei Wohnende mit HW1800==-3
+																			 --> 74 Faelle aus W2, mietfrei Wohnende mit HW1800==-3
+																			 --> 333 Faelle aus W2, mietfrei Wohnende mit HW1800!=-3
+																			 --> 50 Faelle aus W3, mietfrei Wohnende mit HW1800==-3
+																			 --> 351 Faelle aus W3, mietfrei Wohnende mit HW1800!=-3
+																			 --> 432 umkodierte Faelle aus W4, mietfrei Wohnende mit HW1800!=-3
+																             --> 594 umkodierte Faelle aus W5, mietfrei Wohnende mit HW1800!=-3
+																			 --> 456 umkodierte Faelle aus W6, mietfrei Wohnende mit HW1800!=-3
+																			 minus 29 Personen, die mietfrei Wohnen und HW1800==1
+                                     Ja |      4,200        4.45      100.00 --> 4171 Faelle mit HW1800==1, die nicht mietfrei Wohnen
+																			 --> 29 Faelle mit HW1800==1, die mietfrei Wohnen
+----------------------------------------+-----------------------------------
+                                  Total |     94,486      100.00
+
+*/
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist einkwohn1 einkwohn2 {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+*
+exit
+
+/* Hoehe Wohngeld
+HW1900          int    %42.0g      metric     Wohngeld: Hoehe des monatlichen Betrags
+---> Filter: HW1800 = 1 (Bezieher von Wohngeld)
+---> Frage: "Und wie hoch ist der Betrag, den Sie da normalerweise pro Monat erhalten?"
+*/
+* Generierung: Hoehe des Wohngeldes
+gen einkwohnhoehe=HW1900
+replace einkwohnhoehe=0 if einkwohn==0
+* diejenigen, die seltsamerweise angaben mietfrei zu wohnen und dennoch wohngeld zu erhalten== unplausibler wert
+replace einkwohnhoehe=-8 if einkwohn==-8 & HW0300==4 & HW1800==1
+
+* einkwohnhoehe labels
+label variable einkwohnhoehe "Hoehe Wohngeld"
+label define einkwohnhoehe_lab -10 "Item in Fragebogenversion nicht erhoben" -9 "Item in Welle nicht erhoben" -8 "unplausibler Wert" -4 "Frage irrtuemlich nicht gestellt" ///
+-3 "trifft nicht zu wg. Filter" -2 "keine Angabe" -1 "Weiss nicht" 0 "kein Erhalt" 
+label value einkwohnhoehe einkwohnhoehe_lab
+
+* Ueberpruefung
+tab einkwohnhoehe einkwohn
+tab einkwohnhoehe HW1800
+*tab einkwohnhoehe HW1900
+
+* list welle HW0200 HW0300 HW1800 HW1100 einkwohn HW1900 einkwohnhoehe
+* list welle HW0200 HW0300 HW1800 HW1100 einkwohn HW1900 einkwohnhoehe if einkwohnhoehe==-3
+
+exit
+	  
+* Berufsabschluss - wie beruf2 zusammengefasst werden soll bzw. erstmal so anschauen!
+
+/* Zur Frage, ob wir die Variable bgbezs bzw. bgbezb benutzen?!
+Ueberpruefung bgbezs bzw. bgbezb Variable, ob besser als unsere benutzen alg2abez
+Die Variable bgbezb/s gibt an, ob für eine Bedarfgemeisnchaft ALG2 bezogen wird, oder nicht. In manchen
+Haushalten leben mehrere Bedarfsgemeinschaften, z.B. wenn das Kind (Sohn) eines Ehepaars 27 Jahre alt ist. In
+diesem Fall ist das Ehepaar eine Bedarfsgemeinschaft und der Sohn ist als alleinstehender eine eigene BG.
+Diese Variable löst damit nicht unsere Notwenidigkeit auf Personenebene wissen zu müssen,für welche Person eines Haushaltes
+oder einer BG ALG2 bezogen wird. Da die Spell-Info, für welche Person im HH ALG2 bezogen wird auf HH-Ebene ist und nicht auf BG-Ebene,
+müssen wir weiterhin die Variable alg2abez zugrunde legen. Vor allem aber führt offensichtlich kein Weg daran vorbei, im Spelldatensatz 
+auf die Informationen über den ALG-Bezug der einzelnen HH-Mitglieder zurückgreifen zu müssen.
+
+Ueber den folgenden List-Befehl können sich die Daten dazu angeschaut werden:
+list pnr hnr welle alte sex zplfd  neuAL2060 neuAL20701 neuAL20702 neuAL20703 neuAL20704 bgnr  bgbezs  bgbezb bgtyp alg2abez alg2
+
+Einige Beispiele zur Illustration:
+
+pnr            hnr         welle   alter   sex     zplfd   neuAL2060                         neuAL20701 neuAL20702  neuAL20703     bgnr      bgtyp                  bgbezs      bgbezs        alg2abez    alg2
+
+1001004101    10010041       5      52   maennlich  1      nur fuer einige HH-Mitglieder        Ja        nein       nein      1001004101  Ehepaar m. Kind(ern)  ALG2-Bezug   ALG2-Bezug     ja         ja 
+1001004102    10010041       5      49   weiblich	2      nur fuer einige HH-Mitglieder        Ja        nein       nein      1001004101  Ehepaar m. Kind(ern   ALG2-Bezug   ALG2-Bezug     ja         nein
+* Nur ein_e Ehepartner_in, nämlich Person 2 des HH bezieht tatsächlich ALG2, das Kind und die Person 1 des HH bezieht kein ALG2. Die bgbez-Variablen weisen beiden einen Bedarfsgemeinschaftsbezug 
+von ALG2 zu. Nur die auf Basis der Spelldaten generierten Variable (alg2), gibt die Info pro Person an.
+
+pnr            hnr         welle  alter     sex   zplfd     neuAL2060                       neuAL20701 neuAL20702  neuAL20703     bgnr      bgtyp                  bgbezs      bgbezs        alg2abez    alg2
+
+1001425701     10014257     6      54     weiblich   1      nur fuer einige HH-Mitglieder        Ja        nein       ja      1001425701  Ehepaar m. Kind(ern)  ALG2-Bezug   ALG2-Bezug     ja         ja 
+1001425702     10014257     6      51     maennlich	 2      nur fuer einige HH-Mitglieder        Ja        nein       ja      1001425701  Ehepaar m. Kind(ern   ALG2-Bezug   ALG2-Bezug     ja         nein
+
+* das gleiche gilt fuer dieses Beispiel, abermals ein Ehepaar, der gleichen BG. Es wird aber nur fuer eine Person ALG2 bezogen. 
+
+pnr            hnr         welle   alter   sex      zplfd     neuAL2060                       neuAL20701 neuAL20702  neuAL20703  neuAL20704   bgnr         bgtyp                  bgbezs             bgbezs        alg2abez    alg2
+1001130901   10011309        4      56    weiblich    1      nur fuer einige HH-Mitglieder        Nein  trifft n. zu      ja         nein     1001130901   Alleinerziehend     Kein ALG2-Bezug   kein ALG2-Bezug     ja         nein     
+1001130903   10011309        4      34    maennlich   3      nur fuer einige HH-Mitglieder        Nein  trifft n. zu      ja         nein     1001130902   Alleinstehend         ALG2-Bezug         ALG2-Bezug       ja         ja  
+
+* In diesem Fall lebt eine Mutter mit ihrem erwachsenen Sohn im einem HH. Sie haben eine unterschiedliche BG-Nummer und da nur der Sohn ALG2 bezieht, stimmt in diesem Fall die Information der bgbez-Variablen auch für die Person. 
+
+pnr            hnr         welle   alter   sex      zplfd     neuAL2060                       neuAL20701 neuAL20702  neuAL20703    neuAL20704        bgnr         bgtyp                  bgbezs             bgbezs        alg2abez    alg2
+1001041501    10010415        3      54    weiblich    1      nur fuer einige HH-Mitglieder        ja      nein      trifft n. zu   trifft n. zu     1001041501   Alleinstehend         ALG2-Bezug       ALG2-Bezug            ja      ja     
+1001041502    10010415        3      25    weiblich    2      nur fuer einige HH-Mitglieder        ja      nein      trifft n. zu   trifft n. zu     1001041502   Alleinstehend       kein ALG2-Bezug    kein ALG2-Bezug       ja      nein  
+
+* In diesem Fall leben zwei alleinstehende Frauen zusammen in einem HH, sie haben jeweils eine eigene BG.Nummer. Deshalb stimmt auch in diesem Fall die Info über den ALG2-Bezug der Bedarfsgemeinschaft mit der Information auf Personenebene aus den Spelldaten überein.
+
+
+zplfd: laufende Nummer im HH
+neuAL2060: Variable aus dem alg2-Spelldatensatz, die ins long-Format transformiert worden ist: Frage danach, ob für einige oder alle HH-Mitglieder ALG2 bezogen wird
+neuAL20701: Variable aus dem alg2-Spelldatensatz, die ins long-Format transformiert worden ist: Frage ob für Person 1 des HH ALG2 bezogen wird
+neuAL20702: Variable aus dem alg2-Spelldatensatz, die ins long-Format transformiert worden ist: Frage ob für Person 2 des HH ALG2 bezogen wird
+neuAL20703: Variable aus dem alg2-Spelldatensatz, die ins long-Format transformiert worden ist: Frage ob für Person 3 des HH ALG2 bezogen wird
+neuAL20704: Variable aus dem alg2-Spelldatensatz, die ins long-Format transformiert worden ist: Frage ob für Person 4 des HH ALG2 bezogen wird
+bgnr: Nummer der Bedarfsgemeinschaft, aus p-register-Datensatz
+bgtyp: Typ bzw. Verwandschaftsverhältnis einer Bedarfsgemeinschaft
+bgbezs: ALG2-Bezug der Bedarfsgemeinschaft zum Stichprobenzeitpunkt, aus p-register-Datensatz
+bgbezb: ALG2-Bezug der Bedarfsgemeinschaft zum Befragungszeitpunkt, aus p-register-Datensatz
+alg2abez: gegenwärtiger ALG2 Bezug des Haushalts  
+alg2: neu generierte Variable: ALG2 Bezug einer Person
+
+*/
+
+
+exit
+
+*tabellieren, gewichtet mit wqp, dem Hochrechnungsfaktoren (cross section) der Personen: Gesamtstichprobe
+foreach var of varlist sex welle alterg kindzihh ///
+schule schul1 beruf2 famstand hhtyp hhgr blneualt stib ///
+migration akt1euro {
+mvdecode `var', mv(-10/-1)
+tabout `var' nlb  if alosgemeldet==1 [fw=gewicht]      ///
+using `dir_t'\nlb_`var'_gew.xls,replace ///
+c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout `var' nlb  if alosgemeldet==1       ///
+using `dir_t'\nlb_`var'_gew.xls,append ///
+c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%) 
+}
+
+
+tabout welle blneualt if alosgemeldet==1& nlb==1 [fw=gewicht]  using `dir_t'\nlb_welle_blneualt_gew.xls, ///
+	replace  c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout welle blneualt if alosgemeldet==1& nlb==1   using `dir_t'\nlb_welle_blneualt_gew.xls, ///
+	append  c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%)
+
+tabout welle sex if alosgemeldet==1& nlb==1 [fw=gewicht]  using `dir_t'\nlb_welle_sex.xls, ///
+	replace  c(freq row col)  f(0 1 1) clab(gewN gewZeil% gewSp%)
+tabout welle sex if alosgemeldet==1& nlb==1   using `dir_t'\nlb_welle_sex.xls, ///
+	append  c(freq row col)  f(0 1 1) clab(ungewN ungewZeil% ungewSp%)
+
+*für beirat-Tabelle
+bysort blneualt: tab sex nlb if alosgemeldet==1 , row col
+bysort blneualt: tab sex nlb if alosgemeldet==1 [fw=gewicht], row col
+
+bysort blneualt: tab sex nlb if alosgemeldet==1 , row col
+bysort blneualt: tab sex nlb if alosgemeldet==1 [fw=gewicht], row col
+
+
+sort pnr welle
+bysort pnr: gen noy=[_n]
+bysort pnr: gen y=[_N]
+recast int welle
+
+*xtset
+*sort pnr welle
+*xtset pnr welle
+
+*egen BVJ_allejahre = sum(BVJ_sum), by(id)
+
+
+*auf personenebene
+gen nlbja=1 if nlb==1
+by pnr: egen sumnlb=total(nlbja)
+gen persnlb=1 if no==1 & sumnlb >=1 & sumnlb~=.
+tab welle persnlb
